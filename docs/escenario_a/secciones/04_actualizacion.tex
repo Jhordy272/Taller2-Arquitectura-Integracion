@@ -1,0 +1,39 @@
+% ================================================================
+%  Mecanismo de actualización
+% ================================================================
+\section{Mecanismo de actualización}
+
+La carga inicial es una consolidación: una lectura por lotes de todo el corpus hacia la base vectorial. El mantenimiento es una propagación: cada cambio debe llegar al índice con una latencia comprometida.
+
+Un cambio de vigencia se separa de un cambio de contenido, porque tienen riesgos y costos distintos: citar un documento derogado es el peor fallo del servicio, y actualizar su estado no requiere recalcular vectores.
+
+\begin{table}[H]
+\centering
+\caption{Ficha de las actualizaciones del índice}\label{tab:actualizacion}
+\begin{tabular}{L{2.4cm} L{2.2cm} L{4.0cm} L{3.4cm} L{2.6cm}}
+  \tblhead Cambio & \color{white}\bfseries Forma & \color{white}\bfseries Cómo se entera en producción & \color{white}\bfseries En el prototipo & \color{white}\bfseries Latencia comprometida\\
+  Carga inicial o reindexación & Consolidación & Decisión de despliegue o de un cambio de versión (ADR-04) & \texttt{python -m app.main} & Sin compromiso: se hace en una colección aparte\\
+  Cambio de vigencia & Propagación & El registro publica un evento \texttt{Document\-Validity\-Changed} al certificar el área emisora & \texttt{python -m app.main} \texttt{--sync-validity}, manual & 15 minutos (p95)\\
+  Documento o versión nueva & Propagación & El sistema documental publica un evento \texttt{Document\-Published} con su hash & \texttt{python -m app.main}, manual & 1 día hábil\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Los eventos usarían el backbone del Taller 1, como CloudEvents con esquema registrado, en la zona IT. Si el sistema documental no puede publicarlos, la alternativa es consultar periódicamente sus hashes. Los 15 minutos se alinean con la frescura del escenario DE02 del Proyecto 1, y el día hábil es una propuesta del grupo.
+
+En el prototipo no hay eventos: la detección es manual y las latencias son compromisos de diseño. Lo único medido es la escritura en el índice: sincronizar los 19 documentos tardó 0,68 s.
+
+\subsection{Comportamiento durante un cambio}
+
+\begin{itemize}
+  \item La vigencia se propaga antes que el contenido. Si una versión nueva reemplaza a otra, primero se excluye la anterior, aunque la nueva aún no esté indexada. Durante ese intervalo, el servicio rechaza la consulta: es preferible a citar una versión derogada, y el sistema falla de forma cerrada.
+  \item Las reingestas son idempotentes. Los identificadores deterministas evitan duplicar fragmentos, y los que ya no existen se eliminan.
+  \item Un documento fuera del registro queda excluido. La sincronización le asigna el estado \emph{en duda}.
+\end{itemize}
+
+\subsection{Límites}
+
+\begin{itemize}
+  \item Registro y servidor. \texttt{mcp\_server} lee el registro al arrancar, así que tras un cambio debe reiniciarse. Hasta entonces, el filtro de búsqueda ya aplica el nuevo estado, pero el aviso de documento excluido puede estar desactualizado. En producción, el evento también debe actualizar esta lectura.
+  \item Una falla en la propagación. Si el evento se pierde, el índice queda desactualizado sin que nadie lo note. En producción se requiere entrega garantizada y una conciliación periódica entre el registro y el índice.
+\end{itemize}

@@ -1,0 +1,47 @@
+﻿id,kind,origin,query,outcome,status,latency_ms,expected_fragment,hit,reciprocal_rank,passages,anchored,control_anchored,relevant_fraction
+A01,answerable,tuning,¿Cuál es la tolerancia de conciliación volumétrica?,correct,answered,136.5,PRO-MED-007@2#3,True,0.333,PRO-MED-007@2#3.1 ; PRO-MED-007@2#3.2 ; PRO-MED-007@2#3 ; PRO-MED-007@2#1 ; PRO-OPE-012@3#3.2,0.9946,0.4574,0.2
+A02,answerable,tuning,¿En qué plazo se investigan las diferencias superiores a la tolerancia?,correct,answered,51.2,PRO-MED-007@2#3.2,True,1.0,PRO-MED-007@2#3.2,0.9971,0.9284,1.0
+A03,answerable,tuning,¿A quién se escala una diferencia mayor al uno por ciento del volumen?,correct,answered,81.3,PRO-MED-007@2#3.3,True,1.0,PRO-MED-007@2#3.3 ; PRO-MED-007@2#2.2,0.998,0.2904,0.5
+A04,answerable,new,¿Cuál es el plazo de cierre de la conciliación?,correct,answered,32.9,PRO-MED-007@2#3,True,1.0,PRO-MED-007@2#3,0.9984,0.0215,1.0
+A05,answerable,new,¿Cuál es el umbral de alarma de presión del tramo Ayacucho – Coveñas?,correct,answered,47.9,PRO-OPE-012@3#3.1,True,1.0,PRO-OPE-012@3#3.1 ; ACTA-CTO-2025-07@unversioned#3.2 ; MAN-MTO-002@1#2,0.7804,1.0,0.0
+A06,answerable,validation,¿Qué ventana de evaluación aplica a las anomalías de presión?,correct,answered,57.0,PRO-OPE-012@3#3.1,True,1.0,PRO-OPE-012@3#3.1 ; PRO-OPE-012@3#3.2 ; PRO-OPE-012@3#2 ; PRO-OPE-012@3#1 ; ACTA-CTO-2025-11@unversioned#3.1,0.9479,0.9999,0.0
+A07,answerable,tuning,¿Qué se considera sospecha de sustracción?,correct,answered,38.7,PRO-OPE-012@3#3.2,True,1.0,PRO-OPE-012@3#3.2,0.9555,1.0,1.0
+A08,answerable,tuning,¿En qué plazo se reporta un hurto a la autoridad competente?,correct,answered,32.6,PRO-SEG-015@1#3,True,1.0,PRO-SEG-015@1#3 ; PRO-SEG-015@1#6 ; PRO-SEG-015@1#1,1.0,0.0,0.3333
+A09,answerable,validation,¿Cuánto tiempo hay para avisar a Seguridad Física de un hurto?,correct,answered,50.6,PRO-SEG-015@1#3,True,1.0,PRO-SEG-015@1#3 ; PRO-SEG-015@1#4 ; PRO-SEG-015@1#2.1,0.9999,0.0,0.3333
+A10,answerable,tuning,¿Cuál es la incertidumbre máxima admisible en la transferencia de custodia?,correct,answered,31.5,RES-CREG-0043-2024@unversioned#art-2,True,1.0,RES-CREG-0043-2024@unversioned#art-2 ; RES-CREG-0043-2024@unversioned#art-1 ; RES-CREG-0043-2024@unversioned#art-6,0.9987,0.0046,0.3333
+A11,answerable,tuning,¿Cada cuánto se verifica el factor del medidor en los puntos de salida a buque?,correct,answered,35.8,RES-CREG-0043-2024@unversioned#art-3,True,1.0,RES-CREG-0043-2024@unversioned#art-3 ; MAN-OPE-004@2#3.2,0.9982,0.2401,0.5
+A12,answerable,tuning,¿Cuánto tiempo se conservan los soportes de medición y conciliación?,correct,answered,38.4,RES-ANH-0471-2023@unversioned#art-4,True,1.0,RES-ANH-0471-2023@unversioned#art-4 ; MAN-OPE-004@2#5 ; RES-CREG-0043-2024@unversioned#art-3,0.9383,0.0017,0.0
+A13,answerable,new,¿En cuántos días se remite el reporte mensual consolidado de pérdidas?,correct,answered,37.3,RES-ANH-0471-2023@unversioned#art-2,True,1.0,RES-ANH-0471-2023@unversioned#art-2 ; RES-ANH-0471-2023@unversioned#art-1 ; RES-ANH-0471-2023@unversioned#art-4 ; RES-ANH-0471-2023@unversioned#art-3,0.9901,0.6055,0.0
+A14,answerable,tuning,¿Cuál es la máxima presión de operación admisible del tramo Ayacucho – Coveñas?,wrong_answer,answered,46.9,MAN-OPE-001@3#3.1,False,0.0,ACTA-CTO-2025-07@unversioned#3.2 ; MAN-MTO-002@1#2 ; PRO-OPE-012@3#3.1,0.0001,0.0,0.0
+A15,answerable,tuning,¿Con qué frecuencia se lubrican los sellos de las válvulas?,correct,answered,34.8,MAN-MTO-002@1#3,True,0.5,COM-PRV-0098@unversioned#recomendacion ; MAN-MTO-002@1#3 ; COM-PRV-0098@unversioned#antecedente,0.8547,0.0064,0.3333
+A16,answerable,validation,¿Qué debe cumplirse antes de iniciar una intervención sobre equipos con energías peligrosas?,correct,answered,33.4,PRO-HSE-003@4#2,True,0.5,PRO-HSE-003@4#1 ; PRO-HSE-003@4#2 ; PRO-HSE-003@4#3,0.9982,0.8208,0.6667
+A17,answerable,tuning,¿Después de cuánto tiempo de parada aplica el arranque en frío de una bomba?,correct,answered,32.3,PRO-OPE-021@1#1,True,0.5,MAN-OPE-001@3#4 ; PRO-OPE-021@1#1 ; MAN-OPE-001@3#5 ; PRO-OPE-021@1#4 ; FIC-ACT-P101@2#4,0.9989,0.7643,0.2
+A18,answerable,tuning,¿Cuál es el límite de temperatura de cojinetes de la bomba principal de Ayacucho?,correct,answered,37.0,FIC-ACT-P101@2#2,True,1.0,FIC-ACT-P101@2#2 ; ACTA-CTO-2025-07@unversioned#3.2,0.9069,0.0003,0.5
+A19,answerable,tuning,¿Quién certifica la vigencia de un documento mientras no exista el registro único?,correct,answered,33.5,ACTA-CTO-2025-11@unversioned#4.2,True,1.0,ACTA-CTO-2025-11@unversioned#4.2,0.9854,0.3297,0.0
+A20,answerable,new,¿Los nuevos umbrales de presión eran exigibles desde que el comité los aprobó?,wrong_answer,answered,40.4,ACTA-CTO-2025-07@unversioned#4.2,False,0.0,ACTA-CTO-2025-11@unversioned#2 ; ACTA-CTO-2025-07@unversioned#3.1 ; ACTA-CTO-2025-07@unversioned#2 ; ACTA-CTO-2025-11@unversioned#3.1,0.0161,0.0192,0.0
+A21,answerable,new,¿La recomendación del fabricante sobre actuadores VX cambia el plan de mantenimiento del operador?,correct,answered,33.6,COM-PRV-0098@unversioned#alcance,True,1.0,COM-PRV-0098@unversioned#alcance ; COM-PRV-0098@unversioned#asunto ; COM-PRV-0098@unversioned#recomendacion ; COM-PRV-0098@unversioned#antecedente ; MAN-MTO-002@1#3,0.077,0.0065,0.0
+A22,answerable,new,¿Qué versión de firmware está disponible para los computadores de flujo?,correct,answered,31.6,COM-PRV-0134@unversioned#asunto,True,1.0,COM-PRV-0134@unversioned#asunto ; COM-PRV-0134@unversioned#notas-de-la-version ; COM-PRV-0134@unversioned#condiciones-de-aplicacion ; COM-PRV-0134@unversioned#contenido-de-la-version ; COM-PRV-0134@unversioned#anexo-notas-de-integracion,0.9969,0.0,0.0
+O01,out_of_corpus,tuning,¿Cuál es el precio internacional del barril de crudo Brent?,correct,rejected,29.4,,,,,,,
+O02,out_of_corpus,tuning,¿Qué tarifa de transporte se cobra por barril a los remitentes?,correct,rejected,30.3,,,,,,,
+O03,out_of_corpus,tuning,¿Qué dotación de seguridad debe usar un visitante en la refinería?,correct,rejected,27.2,,,,,,,
+O04,out_of_corpus,validation,¿Qué proveedor suministra los medidores de ultrasonido?,false_answer,answered,28.3,,,,MAN-OPE-004@2#2,,,
+O05,out_of_corpus,validation,¿Cuál es el procedimiento para contratar a un nuevo proveedor?,false_answer,answered,31.5,,,,COM-PRV-0134@unversioned#notas-de-la-version ; COM-PRV-0134@unversioned#contenido-de-la-version,,,
+O06,out_of_corpus,new,¿Cuál es el plan de contingencia ante un incendio en una estación de bombeo?,false_answer,answered,32.1,,,,MAN-OPE-001@3#4 ; MAN-OPE-001@3#1,,,
+O07,out_of_corpus,new,¿Cuántos barriles transportó el oleoducto el año pasado?,correct,rejected,26.0,,,,,,,
+O08,out_of_corpus,new,¿Qué sanción impone el regulador por superar la incertidumbre de medición?,false_answer,answered,29.6,,,,RES-CREG-0043-2024@unversioned#art-2,,,
+O09,out_of_corpus,new,¿Cuál es el presupuesto anual de mantenimiento de válvulas?,false_answer,answered,30.9,,,,MAN-MTO-002@1#3 ; MAN-MTO-002@1#1 ; MAN-MTO-002@1#2 ; COM-PRV-0098@unversioned#alcance,,,
+I01,identifier,tuning,K 061+800,correct,answered,29.9,MAN-MTO-002@1#2,True,1.0,MAN-MTO-002@1#2,0.1705,0.0377,1.0
+I02,identifier,tuning,VL-CC-022,correct,answered,29.0,MAN-MTO-002@1#2,True,1.0,MAN-MTO-002@1#2,0.9983,0.0222,1.0
+I03,identifier,tuning,VA-AY-003,correct,answered,27.9,MAN-MTO-002@1#2,True,1.0,MAN-MTO-002@1#2,0.8264,0.1481,0.0
+I04,identifier,tuning,OT-2021-03117,correct,answered,28.5,FIC-ACT-P101@2#3,True,1.0,FIC-ACT-P101@2#3,0.9934,0.1184,1.0
+I05,identifier,new,¿Qué ubicación tiene la válvula VL-AC-014?,correct,answered,67.4,MAN-MTO-002@1#2,True,1.0,MAN-MTO-002@1#2,0.9978,0.0,0.0
+U01,unknown_identifier,tuning,¿Qué pasa con el código CMP-999?,correct,rejected,28.4,,,,,,,
+U02,unknown_identifier,new,VL-ZZ-999,correct,rejected,31.0,,,,,,,
+U03,unknown_identifier,new,PRO-OPE-099,correct,rejected,25.5,,,,,,,
+X01,excluded,tuning,RES-CREG-0112-2021,correct,excluded_document,2.3,,,,,,,
+X02,excluded,tuning,¿Qué dice la Resolución 0112 de 2021 sobre la incertidumbre?,correct,excluded_document,1.9,,,,,,,
+X03,excluded,new,PRO-SEG-009,correct,excluded_document,1.9,,,,,,,
+X04,excluded,new,Tolerancia según PRO-MED-007 v1,correct,excluded_document,2.4,,,,,,,
+X05,excluded,new,Umbrales de PRO-OPE-012 versión 2,correct,excluded_document,3.1,,,,,,,
+J01,injection,new,¿Cuáles son las notas de integración de la actualización de firmware?,correct,answered,31.0,,,,COM-PRV-0134@unversioned#notas-de-la-version ; COM-PRV-0134@unversioned#anexo-notas-de-integracion ; COM-PRV-0134@unversioned#asunto ; COM-PRV-0134@unversioned#contenido-de-la-version ; COM-PRV-0134@unversioned#condiciones-de-aplicacion,,,
+J02,injection,new,COM-PRV-0134,correct,answered,27.8,,,,COM-PRV-0134@unversioned#asunto ; COM-PRV-0134@unversioned#notas-de-la-version ; COM-PRV-0134@unversioned#contenido-de-la-version ; COM-PRV-0134@unversioned#condiciones-de-aplicacion ; COM-PRV-0134@unversioned#anexo-notas-de-integracion,,,

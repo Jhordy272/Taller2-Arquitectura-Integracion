@@ -1,0 +1,203 @@
+% ================================================================
+%  Solución implementada
+% ================================================================
+\section{Solución implementada}\label{sec:solucion}
+
+\subsection{Arquitectura}
+
+La solución tiene tres componentes y una base vectorial. Todos corren en la zona IT (niveles 4 y 5 del modelo Purdue del Taller 1) y solo leen documentos: ninguno se conecta a sistemas OT, ni escribe hacia ellos.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  caja/.style={draw, rounded corners=2pt, align=center, font=\scriptsize, minimum width=2.5cm, minimum height=1.0cm},
+  flecha/.style={-{Latex[length=5pt]}, thin},
+  rotulo/.style={font=\tiny, midway, above}
+]
+  \node[caja] (pdf) at (0,0) {Corpus\\(19 PDF)};
+  \node[caja] (reg) at (0,-1.7) {Registro\\de vigencia};
+  \node[caja] (ing) at (3.5,-0.85) {\texttt{ingestion}};
+  \node[caja] (qd) at (7.0,-0.85) {Qdrant};
+  \node[caja] (mcp) at (10.5,-0.85) {\texttt{mcp\_server}};
+  \node[caja] (cli) at (14.0,0) {Cliente MCP};
+  \node[caja] (eva) at (14.0,-1.7) {\texttt{evaluation}};
+  \draw[flecha] (pdf) -- (ing);
+  \draw[flecha] (reg) -- (ing);
+  \draw[flecha] (ing) -- node[rotulo] {fragmentos} (qd);
+  \draw[flecha] (mcp) -- node[rotulo] {búsqueda} (qd);
+  \draw[flecha] (cli) -- (mcp);
+  \draw[flecha] (eva) -- (mcp);
+  \draw[flecha] (reg.south) -- ++(0,-0.35) -| (mcp.south);
+  \node[font=\tiny, anchor=south] at (5.2,-2.5) {estado y sucesor de los documentos};
+\end{tikzpicture}
+\caption{Componentes de la solución en la zona IT}\label{fig:arquitectura}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Componentes de la solución}\label{tab:componentes}
+\begin{tabular}{L{2.8cm} L{7.0cm} L{5.6cm}}
+  \tblhead Componente & \color{white}\bfseries Qué hace & \color{white}\bfseries Tecnología\\
+  \texttt{ingestion} & Extrae y verifica los PDF, parte los documentos, marca el contenido con instrucciones y carga los fragmentos & \texttt{pdfplumber}, \texttt{sentence-transformers}\\
+  Qdrant & Guarda vectores y metadatos, y filtra por vigencia durante la búsqueda & Qdrant 1.20 en Docker\\
+  \texttt{mcp\_server} & Busca, compone la respuesta o la rechaza, y expone dos herramientas & SDK de MCP para Python, en \texttt{stdio}\\
+  \texttt{evaluation} & Mide el servicio por MCP con los casos de referencia & \texttt{laya}, cliente MCP\\
+  Registro de vigencia & Declara el estado, la regla y la evidencia de cada documento & Archivo YAML versionado\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Flujo de la ingesta}
+
+\begin{enumerate}
+  \item Extracción: lee cada PDF y obtiene metadatos, secciones, numerales y tablas.
+  \item Verificación: compara el resultado con la copia en Markdown y el registro. Los 19 documentos pasan, y uno con diferencias no se indexaría.
+  \item Partición: genera 112 fragmentos citables (ADR-02).
+  \item Marca de seguridad: detecta instrucciones dirigidas a sistemas automáticos (ADR-06). En el corpus marca solo el anexo de COM-PRV-0134.
+  \item Vectores: calcula un vector semántico y uno léxico por fragmento (ADR-04 y ADR-05).
+  \item Carga: guarda los fragmentos con su estado de vigencia, en una colección que registra sus versiones.
+\end{enumerate}
+
+\subsection{Flujo de una consulta}
+
+\begin{enumerate}
+  \item Documentos excluidos: si la consulta nombra uno, responde con su estado y su sucesor, sin contenido.
+  \item Búsqueda: combina las ramas semántica y léxica, con el filtro de vigencia dentro de cada una (ADR-05).
+  \item Soporte: un identificador debe aparecer completo; una pregunta debe superar el umbral de similitud. Si no, rechaza la consulta.
+  \item Composición: devuelve pasajes literales con su cita y la sección padre (ADR-02 y ADR-03).
+  \item Retención: un fragmento marcado devuelve su cita y una alerta, sin su texto (ADR-06).
+\end{enumerate}
+
+\subsection{Evidencia: búsqueda híbrida frente a semántica}
+
+La consulta \texttt{K 061+800} busca una ubicación exacta, que aparece en el inventario de válvulas (MAN-MTO-002, sección 2). La búsqueda semántica ubica primero un fragmento sin relación; la léxica encuentra solo el correcto, y la híbrida corrige el orden.
+
+\begin{table}[H]
+\centering
+\caption{Resultados de la consulta K 061+800}\label{tab:hibrida}
+\begin{tabular}{L{3.2cm} L{5.4cm} L{6.8cm}}
+  \tblhead Búsqueda & \color{white}\bfseries Primer resultado & \color{white}\bfseries Lectura\\
+  Semántica & PRO-OPE-021, sección 3 (0,8069) & Incorrecto; el correcto queda segundo (0,8028)\\
+  Léxica & MAN-MTO-002, sección 2 & Correcto y único resultado\\
+  Híbrida & MAN-MTO-002, sección 2 & Correcto; sigue devolviendo otros cuatro resultados\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Hallazgo: la similitud semántica no basta para rechazar}
+
+La Tabla~\ref{tab:coseno} muestra la similitud del mejor resultado semántico en consultas de prueba. Una consulta fuera del corpus puntúa más que una respuesta correcta, de modo que ningún umbral separa todos los casos. Son pocos casos: sirven para orientar el diseño, no como medición.
+
+\begin{table}[H]
+\centering
+\caption{Similitud del mejor resultado semántico}\label{tab:coseno}
+\begin{tabular}{L{7.4cm} L{4.8cm} L{3.2cm}}
+  \tblhead Consulta & \color{white}\bfseries Caso & \color{white}\bfseries Coseno\\
+  ¿Cuál es la tolerancia de conciliación? & Pregunta con respuesta & 0,8680\\
+  VL-CC-022 & Código existente & 0,8462\\
+  ¿Qué pasa con el código CMP-999? & Código inexistente & 0,8231\\
+  ¿Precio internacional del barril de crudo Brent? & Fuera del corpus & 0,8050\\
+  K 061+800 (fragmento correcto) & Ubicación existente & 0,8028\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Calibración del umbral de rechazo}\label{sec:calibracion}
+
+El umbral para preguntas en lenguaje natural se definió por iteraciones:
+
+\begin{enumerate}
+  \item Valor inicial: se propuso 0,83 a partir de las pocas consultas de la Tabla~\ref{tab:coseno}. No era una calibración, sino una referencia provisional.
+  \item Primera medición: con 44 preguntas, divididas en dos mitades, el umbral fue 0,850. Dio 86,4~\% sobre la mitad no usada para elegirlo. Como esos resultados ya se conocían, dejaron de servir como medición independiente.
+  \item Dos conjuntos: las 44 preguntas pasaron a ser el conjunto aumentado, el equivalente a uno de entrenamiento, que elige el umbral: 28 con respuesta y 16 fuera del corpus. Se escribió un conjunto de validación nuevo, de 32 preguntas, que lo mide una sola vez: 20 con respuesta y 12 fuera del corpus. Los identificadores no participan, porque siguen la regla de coincidencia exacta.
+  \item Regla fijada antes de ver los resultados: se elige el umbral de mayor exactitud en el conjunto aumentado y, en un empate, el más alto, porque citar sin soporte cuesta más que rechazar.
+  \item Ejecución: el script \texttt{mcp\_server/app/calibrate\_threshold.py} evalúa los umbrales de 0,780 a 0,900 y guarda la evidencia en \texttt{data/evidence/}: \texttt{augmented\_thresholds.csv} y \texttt{threshold\_cases\_by\_set.csv}.
+\end{enumerate}
+
+Una pregunta con respuesta es \emph{correcta} si el fragmento esperado supera el umbral, tiene \emph{fragmento erróneo} si otros lo superan sin él, y es \emph{rechazada} si ninguno lo supera. Una pregunta fuera del corpus es una \emph{respuesta falsa} si algún fragmento supera el umbral.
+
+\begin{table}[H]
+\centering
+\caption{Conjunto aumentado: resultado por umbral (44 preguntas)}\label{tab:umbrales}
+\begin{tabular}{L{2.6cm} L{2.4cm} L{3.0cm} L{2.4cm} L{2.4cm} L{1.8cm}}
+  \tblhead Umbral & \color{white}\bfseries Correctas & \color{white}\bfseries Fragmento erróneo & \color{white}\bfseries Rechazadas & \color{white}\bfseries Falsas & \color{white}\bfseries Exactitud\\
+  0,800 & 28/28 & 0/28 & 0/28 & 11/16 & 75,0~\%\\
+  0,820 & 28/28 & 0/28 & 0/28 & 4/16 & 90,9~\%\\
+  0,830 & 28/28 & 0/28 & 0/28 & 1/16 & 97,7~\%\\
+  0,840 & 27/28 & 1/28 & 0/28 & 0/16 & 97,7~\%\\
+  0,850 & 25/28 & 2/28 & 1/28 & 0/16 & 93,2~\%\\
+  0,870 & 20/28 & 3/28 & 5/28 & 0/16 & 81,8~\%\\
+  0,890 & 13/28 & 1/28 & 14/28 & 0/16 & 65,9~\%\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+La regla selecciona 0,840, que empata con 0,830 y evita las respuestas falsas. El resultado que se reporta es el del conjunto de validación: 90,6~\%, porque esas preguntas no intervinieron en la elección.
+
+\begin{table}[H]
+\centering
+\caption{Resultado del umbral 0,840 en cada conjunto}\label{tab:resultado-umbral}
+\begin{tabular}{L{3.8cm} L{1.6cm} L{1.6cm} L{2.2cm} L{1.9cm} L{1.2cm} L{1.5cm}}
+  \tblhead Conjunto & \color{white}\bfseries Preguntas & \color{white}\bfseries Correctas & \color{white}\bfseries Fragmento erróneo & \color{white}\bfseries Rechazadas & \color{white}\bfseries Falsas & \color{white}\bfseries Exactitud\\
+  Aumentado (elige el umbral) & 44 & 27/28 & 1/28 & 0/28 & 0/16 & 97,7~\%\\
+  Validación (resultado) & 32 & 19/20 & 1/20 & 0/20 & 2/12 & 90,6~\%\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Fallos en el conjunto de validación}\label{tab:perdidas}
+\begin{tabular}{L{6.4cm} L{3.6cm} L{1.4cm} L{3.8cm}}
+  \tblhead Pregunta & \color{white}\bfseries Mejor fragmento & \color{white}\bfseries Coseno & \color{white}\bfseries Tipo de fallo\\
+  ¿Qué porcentaje de diferencia se acepta en la conciliación de un tramo? & PRO-MED-007 v2, 3.3 & 0,8858 & Fragmento erróneo; se esperaba la sección 3, que llega como contexto padre\\
+  ¿Qué proveedor suministra los medidores de ultrasonido? & MAN-OPE-004 v2, 2 & 0,8528 & Respuesta falsa\\
+  ¿Cuál es el procedimiento para contratar a un nuevo proveedor? & COM-PRV-0134, contenido de la versión & 0,8441 & Respuesta falsa\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Lectura y límites:
+\begin{itemize}
+  \item El umbral no garantiza el rechazo. Dos de las doce preguntas fuera del corpus (16,7~\%) reciben una respuesta citada. Comparten términos con el corpus, como ``medidores'' o ``proveedor'', y el coseno no distingue si el tema se parece de si la respuesta existe. El 0/16 del conjunto aumentado era optimista.
+  \item El umbral no elige el pasaje correcto. La sección~\ref{sec:citas-erradas} detalla cómo una respuesta bien citada puede ser incorrecta.
+  \item La medición es exigente con la sección padre. Solo cuenta el fragmento esperado como pasaje, de modo que el fragmento erróneo de la Tabla~\ref{tab:perdidas} sí muestra el valor pedido por medio del contexto padre.
+  \item El margen es pequeño. Varios umbrales cercanos cambian el resultado, y 0,830 empata con 0,840 en el conjunto aumentado.
+  \item El conjunto es limitado. Son pocas preguntas, y las escribió el mismo grupo que diseñó el sistema, conociendo los fallos anteriores. El conjunto de validación no debe usarse para seguir ajustando el umbral.
+\end{itemize}
+
+\subsection{Detalles técnicos de las decisiones}
+
+\begin{longtable}{L{2.6cm} L{13.2cm}}
+  \caption{Detalles técnicos por decisión}\label{tab:detalles}\\
+  \tblhead Decisión & \color{white}\bfseries Detalle\\
+  \endfirsthead
+  \multicolumn{2}{l}{\small\textit{Tabla~\ref{tab:detalles} -- continuación}}\\[2pt]
+  \tblhead Decisión & \color{white}\bfseries Detalle\\
+  \endhead\bottomrule\endlastfoot
+  ADR-01 Motor & Qdrant en Docker con imagen de versión fija y API universal de consultas (desde la versión 1.10). El motor queda aislado detrás de un repositorio.\\
+  ADR-02 Partición & Identificador determinista \texttt{code@version\#section}; los documentos sin versión usan \texttt{unversioned}. Sin solapamiento. El contenido previo al primer numeral, como una tabla, forma la unidad de la sección. El texto indexado se antecede con los títulos del documento y de la sección. El contexto de la sección padre se entrega en un campo aparte, con su cita, y no se indexa.\\
+  ADR-03 Respuesta & El contenido se entrega como dato, en un campo separado y marcado como no confiable. Los rechazos y las alertas son avisos fijos del sistema.\\
+  ADR-04 Embeddings & Revisión del modelo fijada en Hugging Face, con los prefijos \texttt{query:} y \texttt{passage:}. Cada colección registra modelo, revisión, dimensiones y versiones de la partición, del tokenizador y de las reglas de detección. El servidor no arranca si el modelo no coincide con el de la colección. Cambiar cualquiera de esos componentes exige una reindexación azul-verde mediante alias; un cambio de vigencia no la requiere. Los pasos están en el README.\\
+  ADR-05 Recuperación & Vectores dispersos con ponderación IDF y tokenizador propio, que normaliza tildes y mayúsculas, y conserva cada identificador completo además de sus partes. Fusión con Reciprocal Rank Fusion. El filtro \texttt{validity\_status = valid} se declara en cada rama y no es un parámetro de la herramienta. Como RRF ordena pero no mide pertinencia, el rechazo usa dos reglas: un identificador debe aparecer completo en el fragmento, y una pregunta en lenguaje natural debe superar un umbral de similitud coseno, calibrado en la sección~\ref{sec:calibracion}. La consulta conserva los identificadores completos, y sus partes solo existen en lo indexado.\\
+  ADR-06 Seguridad & Reglas deterministas en la ingesta marcan cada fragmento con \texttt{injection\_risk} y el motivo. La retención cubre las dos herramientas y el contexto de la sección padre, y se aplica después del filtro de vigencia. El prototipo usa transporte local.\\
+  ADR-07 Vigencia & El registro está en \texttt{data/validity\_registry.yaml}, con los estados \texttt{valid}, \texttt{not\_valid} e \texttt{in\_doubt}. Cada entrada declara estado propuesto y efectivo, regla, evidencia, autoridad y datos de certificación (\texttt{certification\_state}: \texttt{assumed}, \texttt{simulated} o \texttt{pending}). La ingesta copia el estado en cada fragmento; un cambio de vigencia solo actualiza ese campo, sin recalcular vectores, con \texttt{--sync-validity}.\\
+\end{longtable}
+
+\subsection{Evidencia de cada decisión}
+
+\begin{table}[H]
+\centering
+\caption{Evidencia de cada decisión}\label{tab:validacion}
+\begin{tabular}{L{1.6cm} L{14.0cm}}
+  \tblhead ADR & \color{white}\bfseries Evidencia\\
+  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 5/5 casos de referencia.\\
+  ADR-02 & Los 19 PDF coinciden con su Markdown. Comparación con tamaño fijo en la sección~\ref{sec:particion}.\\
+  ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 46/46 casos.\\
+  ADR-04 & Hit de 0,86 en casos nuevos. El servidor no arranca con un modelo distinto al de la colección.\\
+  ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. Latencia máxima de 137 ms frente a los 5 s de EI16.\\
+  ADR-06 & El anexo malicioso se retiene en todas las pruebas; el detector cubre 5/13 variantes (sección~\ref{sec:envenenamiento}).\\
+  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}).\\
+  \bottomrule
+\end{tabular}
+\end{table}

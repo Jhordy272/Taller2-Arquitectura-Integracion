@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "petroandes-documents": {
+      "type": "stdio",
+      "command": "venv/Scripts/python.exe",
+      "args": ["-m", "app.main"],
+      "env": {
+        "PYTHONPATH": "mcp_server"
+      }
+    }
+  }
+}

@@ -1,0 +1,307 @@
+schema_version: 1
+default_status: in_doubt
+
+documents:
+  - code: MAN-MTO-002
+    version: "1"
+    pdf: 01_manuales/MAN-MTO-002_v1.pdf
+    document_class: operational
+    proposed_status: in_doubt
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R5
+    evidence_level: conflicting
+    evidence: "ACTA-CTO-2025-11, num. 3.3: un manual sin identificar dejó de aplicarse."
+    authority: Gerencia de Integridad y Mantenimiento
+    superseded_by: null
+
+  - code: MAN-OPE-001
+    version: "3"
+    pdf: 01_manuales/MAN-OPE-001_v3.pdf
+    document_class: operational
+    proposed_status: in_doubt
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R5
+    evidence_level: conflicting
+    evidence: "ACTA-CTO-2025-11, num. 3.3: un manual sin identificar dejó de aplicarse."
+    authority: Vicepresidencia de Transporte — Operaciones
+    superseded_by: null
+
+  - code: MAN-OPE-004
+    version: "2"
+    pdf: 01_manuales/MAN-OPE-004_v2.pdf
+    document_class: operational
+    proposed_status: in_doubt
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R5
+    evidence_level: conflicting
+    evidence: "ACTA-CTO-2025-11, num. 3.3: un manual sin identificar dejó de aplicarse."
+    authority: Gerencia de Medición
+    superseded_by: null
+
+  - code: PRO-HSE-003
+    version: "4"
+    pdf: 02_procedimientos/PRO-HSE-003_v4.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Última versión del corpus, sin evidencia en contra."
+    authority: Vicepresidencia HSE
+    superseded_by: null
+
+  - code: PRO-MED-007
+    version: "1"
+    pdf: 02_procedimientos/PRO-MED-007_v1.pdf
+    document_class: operational
+    proposed_status: not_valid
+    status: not_valid
+    certification_state: simulated
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R1
+    evidence_level: high
+    evidence: "PRO-MED-007 v2, encabezado: reemplaza a PRO-MED-007 v1."
+    authority: Gerencia de Medición
+    superseded_by: PRO-MED-007@2
+
+  - code: PRO-MED-007
+    version: "2"
+    pdf: 02_procedimientos/PRO-MED-007_v2.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: medium
+    evidence: "ACTA-CTO-2025-11, num. 3.2: resultados bajo la nueva tolerancia de conciliación."
+    authority: Gerencia de Medición
+    superseded_by: null
+
+  - code: PRO-OPE-012
+    version: "2"
+    pdf: 02_procedimientos/PRO-OPE-012_v2.pdf
+    document_class: operational
+    proposed_status: not_valid
+    status: not_valid
+    certification_state: simulated
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R1
+    evidence_level: high
+    evidence: "PRO-OPE-012 v3, encabezado y num. 3.1: reemplaza a la v2."
+    authority: Centro de Control de Operaciones
+    superseded_by: PRO-OPE-012@3
+
+  - code: PRO-OPE-012
+    version: "3"
+    pdf: 02_procedimientos/PRO-OPE-012_v3.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: high
+    evidence: "ACTA-CTO-2025-11, num. 3.1: la versión actualizada fue emitida y está en aplicación."
+    authority: Centro de Control de Operaciones
+    superseded_by: null
+
+  - code: PRO-OPE-021
+    version: "1"
+    pdf: 02_procedimientos/PRO-OPE-021_v1.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Única versión del corpus, sin evidencia en contra."
+    authority: Centro de Control de Operaciones
+    superseded_by: null
+
+  - code: PRO-SEG-009
+    version: "1"
+    pdf: 02_procedimientos/PRO-SEG-009_v1.pdf
+    document_class: operational
+    proposed_status: not_valid
+    status: not_valid
+    certification_state: simulated
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R2
+    evidence_level: high
+    evidence: "PRO-SEG-015 v1, encabezado y num. 1: lo reemplaza íntegramente y queda sin efecto."
+    authority: Gerencia de Seguridad Física
+    superseded_by: PRO-SEG-015@1
+
+  - code: PRO-SEG-015
+    version: "1"
+    pdf: 02_procedimientos/PRO-SEG-015_v1.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Sucesor de PRO-SEG-009, sin evidencia en contra."
+    authority: Gerencia de Seguridad Física
+    superseded_by: null
+
+  - code: RES-ANH-0471-2023
+    version: unversioned
+    pdf: 03_normativa/RES-ANH-0471-2023.pdf
+    document_class: regulatory
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Art. 5: rige desde su publicación; sin derogatoria en el corpus."
+    authority: Gerencia de Cumplimiento
+    superseded_by: null
+
+  - code: RES-CREG-0043-2024
+    version: unversioned
+    pdf: 03_normativa/RES-CREG-0043-2024.pdf
+    document_class: regulatory
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Art. 6: rige desde su publicación y deroga la Resolución 0112 de 2021."
+    authority: Gerencia de Cumplimiento
+    superseded_by: null
+
+  - code: RES-CREG-0112-2021
+    version: unversioned
+    pdf: 03_normativa/RES-CREG-0112-2021.pdf
+    document_class: regulatory
+    proposed_status: not_valid
+    status: not_valid
+    certification_state: simulated
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R3
+    evidence_level: high
+    evidence: "RES-CREG-0043-2024, art. 6: la deroga en su integridad."
+    authority: Gerencia de Cumplimiento
+    superseded_by: RES-CREG-0043-2024@unversioned
+
+  - code: ACTA-CTO-2025-07
+    version: unversioned
+    pdf: 04_actas/ACTA-CTO-2025-07.pdf
+    document_class: record
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R4
+    evidence_level: presumption
+    evidence: "Registro de sesión; num. 4.2: sus valores no son exigibles hasta emitir el procedimiento."
+    authority: Comité Técnico Operativo
+    superseded_by: null
+
+  - code: ACTA-CTO-2025-11
+    version: unversioned
+    pdf: 04_actas/ACTA-CTO-2025-11.pdf
+    document_class: record
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R4
+    evidence_level: presumption
+    evidence: "Registro de sesión; num. 4.2 asigna la certificación al área emisora."
+    authority: Comité Técnico Operativo
+    superseded_by: null
+
+  - code: COM-PRV-0098
+    version: unversioned
+    pdf: 05_comunicaciones/COM-PRV-0098.pdf
+    document_class: record
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R4
+    evidence_level: presumption
+    evidence: "Alcance: no modifica los planes de mantenimiento del operador."
+    authority: Gerencia de Integridad y Mantenimiento
+    superseded_by: null
+
+  - code: COM-PRV-0134
+    version: unversioned
+    pdf: 05_comunicaciones/COM-PRV-0134.pdf
+    document_class: record
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: R4
+    evidence_level: presumption
+    evidence: "Comunicación de proveedor, sin efecto sobre documentos operativos."
+    authority: Gerencia de Medición
+    superseded_by: null
+
+  - code: FIC-ACT-P101
+    version: "2"
+    pdf: 06_fichas/FIC-ACT-P101_v2.pdf
+    document_class: operational
+    proposed_status: valid
+    status: valid
+    certification_state: assumed
+    certified_by: null
+    certified_on: null
+    certification_reference: null
+    rule: null
+    evidence_level: presumption
+    evidence: "Última versión del corpus, sin evidencia en contra."
+    authority: Gerencia de Integridad y Mantenimiento
+    superseded_by: null

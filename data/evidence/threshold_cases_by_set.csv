@@ -1,0 +1,77 @@
+﻿set,query,expected_fragment,best_fragment,best_cosine,expected_cosine,outcome_at_0.840
+augmented,¿Cuál es la tolerancia de conciliación volumétrica?,PRO-MED-007@2#3,PRO-MED-007@2#3.1,0.8944,0.8755,correct
+augmented,¿Qué se hace con una diferencia que está dentro de la tolerancia?,PRO-MED-007@2#3.1,PRO-MED-007@2#3.1,0.8494,0.8494,correct
+augmented,¿En qué plazo se investigan las diferencias superiores a la tolerancia?,PRO-MED-007@2#3.2,PRO-MED-007@2#3.2,0.8685,0.8685,correct
+augmented,¿A quién se escala una diferencia mayor al uno por ciento del volumen?,PRO-MED-007@2#3.3,PRO-MED-007@2#3.3,0.868,0.868,correct
+augmented,¿Cómo se calcula la diferencia de balance de un tramo?,PRO-MED-007@2#2.1,PRO-MED-007@2#2.2,0.8727,0.8665,correct
+augmented,¿Quién firma el acta de conciliación mensual?,PRO-MED-007@2#4,PRO-MED-007@2#4,0.879,0.879,correct
+augmented,¿Cuál es el umbral de alarma de presión del tramo Caucasia – Coveñas?,PRO-OPE-012@3#3.1,PRO-OPE-012@3#3.1,0.8936,0.8936,correct
+augmented,¿Qué se considera sospecha de sustracción?,PRO-OPE-012@3#3.2,PRO-OPE-012@3#3.2,0.8575,0.8575,correct
+augmented,¿A quién notifica el operador cuando se confirma una anomalía de presión?,PRO-OPE-012@3#4.1,PRO-OPE-012@3#4.1,0.9011,0.9011,correct
+augmented,¿En qué plazo se reporta un hurto a la autoridad competente?,PRO-SEG-015@1#3,PRO-SEG-015@1#3,0.8713,0.8713,correct
+augmented,¿Qué contenido mínimo debe tener el reporte de un evento de hurto?,PRO-SEG-015@1#4,PRO-SEG-015@1#4,0.8934,0.8934,correct
+augmented,¿Cómo se preserva la evidencia de un hurto de hidrocarburos?,PRO-SEG-015@1#5,PRO-SEG-015@1#5,0.8969,0.8969,correct
+augmented,¿Cuál es la incertidumbre máxima admisible en la transferencia de custodia?,RES-CREG-0043-2024@unversioned#art-2,RES-CREG-0043-2024@unversioned#art-2,0.9168,0.9168,correct
+augmented,¿Cada cuánto se verifica el factor del medidor en los puntos de salida a buque?,RES-CREG-0043-2024@unversioned#art-3,RES-CREG-0043-2024@unversioned#art-3,0.8979,0.8979,correct
+augmented,¿En cuántos días se reportan las desviaciones de medición?,RES-CREG-0043-2024@unversioned#art-5,RES-CREG-0043-2024@unversioned#art-5,0.9051,0.9051,correct
+augmented,¿Con qué periodicidad se envía el reporte de pérdidas de hidrocarburos?,RES-ANH-0471-2023@unversioned#art-2,RES-ANH-0471-2023@unversioned#art-1,0.903,0.9028,correct
+augmented,¿Cuánto tiempo se conservan los soportes de medición y conciliación?,RES-ANH-0471-2023@unversioned#art-4,RES-ANH-0471-2023@unversioned#art-4,0.9087,0.9087,correct
+augmented,¿Cuál es la máxima presión de operación admisible del tramo Ayacucho – Coveñas?,MAN-OPE-001@3#3.1,ACTA-CTO-2025-07@unversioned#3.2,0.873,0.8323,wrong_fragment
+augmented,¿Qué autorización se necesita para operar por encima del noventa por ciento del MAOP?,MAN-OPE-001@3#3.2,MAN-OPE-001@3#3.2,0.9039,0.9039,correct
+augmented,¿Con qué frecuencia se lubrican los sellos de las válvulas?,MAN-MTO-002@1#3,COM-PRV-0098@unversioned#recomendacion,0.8779,0.8424,correct
+augmented,¿Qué se requiere antes de intervenir una válvula de línea?,MAN-MTO-002@1#4,MAN-MTO-002@1#4,0.8888,0.8888,correct
+augmented,¿Cuál es la secuencia obligatoria de bloqueo y etiquetado?,PRO-HSE-003@4#3,PRO-HSE-003@4#3,0.8858,0.8858,correct
+augmented,¿Quién puede retirar la etiqueta de bloqueo de otra persona?,PRO-HSE-003@4#4,PRO-HSE-003@4#4,0.8923,0.8923,correct
+augmented,¿Después de cuánto tiempo de parada aplica el arranque en frío de una bomba?,PRO-OPE-021@1#1,PRO-OPE-021@1#1,0.9076,0.9076,correct
+augmented,¿Qué se hace si hay una desviación durante el arranque en frío?,PRO-OPE-021@1#4,PRO-OPE-021@1#4,0.8795,0.8795,correct
+augmented,¿Cuál es el límite de temperatura de cojinetes de la bomba principal de Ayacucho?,FIC-ACT-P101@2#2,FIC-ACT-P101@2#2,0.8744,0.8744,correct
+augmented,¿Quién certifica la vigencia de un documento mientras no exista el registro único?,ACTA-CTO-2025-11@unversioned#4.2,ACTA-CTO-2025-11@unversioned#4.2,0.8538,0.8538,correct
+augmented,¿Qué recomienda el fabricante para los actuadores de válvula serie VX?,COM-PRV-0098@unversioned#recomendacion,COM-PRV-0098@unversioned#alcance,0.9186,0.9119,correct
+augmented,¿Cuál es el precio internacional del barril de crudo Brent?,,RES-ANH-0471-2023@unversioned#art-5,0.805,,rejected
+augmented,¿Cuál es el salario de un operador del Centro de Control?,,ACTA-CTO-2025-11@unversioned#1,0.8283,,rejected
+augmented,¿Cuál es la capital de Colombia?,,MAN-OPE-001@3#1,0.7598,,rejected
+augmented,¿Cómo solicito mis vacaciones en la compañía?,,COM-PRV-0098@unversioned#recomendacion,0.7995,,rejected
+augmented,¿Qué tarifa de transporte se cobra por barril a los remitentes?,,RES-ANH-0471-2023@unversioned#art-2,0.824,,rejected
+augmented,¿Cuántos pozos activos tiene la compañía en los Llanos Orientales?,,MAN-OPE-001@3#3.2,0.7955,,rejected
+augmented,¿Cuál es el procedimiento de soldadura para reparar un ducto submarino?,,COM-PRV-0098@unversioned#recomendacion,0.8033,,rejected
+augmented,¿Con qué frecuencia se inspeccionan los ductos con raspadores inteligentes?,,MAN-MTO-002@1#3,0.8076,,rejected
+augmented,¿Cuál es la política de ciberseguridad del sistema SCADA?,,ACTA-CTO-2025-07@unversioned#3.1,0.8049,,rejected
+augmented,¿Cuáles son los requisitos de la certificación ISO 14001?,,RES-CREG-0043-2024@unversioned#art-4,0.8243,,rejected
+augmented,¿Cuál es el plan de manejo ambiental ante un derrame en un río?,,PRO-OPE-012@3#3.1,0.8125,,rejected
+augmented,¿Quién es el presidente de PetroAndes?,,MAN-OPE-001@3#1,0.7675,,rejected
+augmented,¿Qué capacidad de almacenamiento tiene el terminal de Coveñas?,,PRO-OPE-012@3#3.1,0.8005,,rejected
+augmented,¿Cuál es la receta para preparar una bandeja paisa?,,PRO-OPE-021@1#3,0.7955,,rejected
+augmented,¿Cómo se calcula la regalía de un contrato de exploración?,,RES-CREG-0043-2024@unversioned#art-3,0.8065,,rejected
+augmented,¿Qué dotación de seguridad debe usar un visitante en la refinería?,,PRO-SEG-015@1#3,0.835,,rejected
+validation,¿Qué porcentaje de diferencia se acepta en la conciliación de un tramo?,PRO-MED-007@2#3,PRO-MED-007@2#3.3,0.8858,,wrong_fragment
+validation,¿Hay que investigar las diferencias que no superan la tolerancia?,PRO-MED-007@2#3.1,PRO-MED-007@2#3.1,0.852,0.852,correct
+validation,¿Se tienen en cuenta los volúmenes de purga al calcular la diferencia?,PRO-MED-007@2#2.1,PRO-MED-007@2#2.1,0.8776,0.8776,correct
+validation,¿Qué ventana de evaluación aplica a las anomalías de presión?,PRO-OPE-012@3#3.1,PRO-OPE-012@3#3.1,0.8965,0.8965,correct
+validation,¿Qué procedimiento se activa ante una sospecha de sustracción?,PRO-OPE-012@3#4.3,PRO-SEG-015@1#2.1,0.8818,0.8625,correct
+validation,¿Cuánto tiempo hay para avisar a Seguridad Física de un hurto?,PRO-SEG-015@1#3,PRO-SEG-015@1#3,0.8642,0.8642,correct
+validation,¿Cuándo se activa el procedimiento de hurto de hidrocarburos?,PRO-SEG-015@1#2.1,PRO-SEG-015@1#2.1,0.8832,0.8832,correct
+validation,¿Cada cuánto se verifica un medidor en los puntos que no son de salida a buque?,RES-CREG-0043-2024@unversioned#art-3,RES-CREG-0043-2024@unversioned#art-3,0.8976,0.8976,correct
+validation,¿Qué trazabilidad deben tener los patrones de verificación?,RES-CREG-0043-2024@unversioned#art-4,RES-CREG-0043-2024@unversioned#art-4,0.9136,0.9136,correct
+validation,¿Qué debe incluir el reporte mensual de pérdidas de hidrocarburos?,RES-ANH-0471-2023@unversioned#art-3,RES-ANH-0471-2023@unversioned#art-2,0.8936,0.8866,correct
+validation,¿Cuál es el MAOP del tramo Caucasia – Coveñas?,MAN-OPE-001@3#3.1,MAN-OPE-001@3#3.1,0.8737,0.8737,correct
+validation,¿Qué verifica el operador de medición al inicio de cada turno?,MAN-OPE-004@2#3.1,MAN-OPE-004@2#3.1,0.9049,0.9049,correct
+validation,¿Qué incertidumbre declara el medidor de Coveñas de salida a buque?,MAN-OPE-004@2#3.2,MAN-OPE-004@2#3.2,0.8414,0.8414,correct
+validation,¿Cuál es el plan de mantenimiento preventivo de las válvulas?,MAN-MTO-002@1#3,MAN-MTO-002@1#1,0.8859,0.8841,correct
+validation,¿Qué debe cumplirse antes de iniciar una intervención sobre equipos con energías peligrosas?,PRO-HSE-003@4#2,PRO-HSE-003@4#1,0.8786,0.8752,correct
+validation,¿Qué condiciones previas exige el arranque en frío de una bomba?,PRO-OPE-021@1#2,PRO-OPE-021@1#2,0.905,0.905,correct
+validation,¿Qué presión de descarga de diseño tiene la bomba principal de Ayacucho?,FIC-ACT-P101@2#2,FIC-ACT-P101@2#2,0.8688,0.8688,correct
+validation,¿Qué intervenciones mayores ha tenido la bomba principal de Ayacucho?,FIC-ACT-P101@2#3,FIC-ACT-P101@2#3,0.8567,0.8567,correct
+validation,¿Qué instruyó el comité sobre el registro único de vigencia documental?,ACTA-CTO-2025-11@unversioned#4.1,ACTA-CTO-2025-11@unversioned#4.1,0.8679,0.8679,correct
+validation,¿Qué requiere la actualización del firmware de los computadores de flujo?,COM-PRV-0134@unversioned#condiciones-de-aplicacion,COM-PRV-0134@unversioned#asunto,0.8973,0.8948,correct
+validation,¿Cuál es la política de teletrabajo de la compañía?,,ACTA-CTO-2025-07@unversioned#5,0.8014,,rejected
+validation,¿Cómo se liquida el auxilio de transporte de los empleados?,,PRO-MED-007@2#3.3,0.8077,,rejected
+validation,¿Cuál es el punto de ebullición del diésel?,,PRO-HSE-003@4#3,0.8187,,rejected
+validation,¿Cuánto cuesta un galón de gasolina en Bogotá?,,MAN-OPE-001@3#3.1,0.801,,rejected
+validation,¿Qué normas aplican al transporte de gas natural licuado?,,MAN-OPE-001@3#1,0.8262,,rejected
+validation,¿Cómo se calibra un cromatógrafo de gases?,,MAN-OPE-004@2#2,0.8073,,rejected
+validation,¿Cuántas refinerías tiene la compañía?,,COM-PRV-0098@unversioned#recomendacion,0.7975,,rejected
+validation,¿Qué proveedor suministra los medidores de ultrasonido?,,MAN-OPE-004@2#2,0.8528,,false_answer
+validation,¿Cuál es el horario del casino de la estación?,,FIC-ACT-P101@2#3,0.7885,,rejected
+validation,¿Quién ganó el mundial de fútbol de 2014?,,ACTA-CTO-2025-07@unversioned#3.1,0.7248,,rejected
+validation,¿Cuál es el procedimiento para contratar a un nuevo proveedor?,,COM-PRV-0134@unversioned#contenido-de-la-version,0.8441,,false_answer
+validation,¿Cómo se trata el agua de producción en un campo petrolero?,,MAN-OPE-001@3#2,0.8005,,rejected

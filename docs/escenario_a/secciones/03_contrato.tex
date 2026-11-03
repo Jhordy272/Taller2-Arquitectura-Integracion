@@ -1,0 +1,83 @@
+% ================================================================
+%  Contrato del corpus
+% ================================================================
+\section{Contrato del corpus}\label{sec:contrato}
+
+\subsection{Contrato por tipo de documento}
+
+La Tabla~\ref{tab:contrato} define la partición, su justificación y el gobierno de la vigencia para cada tipo de documento. Las reglas son las del ADR-07.
+
+\begin{table}[H]
+\centering
+\caption{Contrato por tipo de documento}\label{tab:contrato}
+\begin{tabular}{L{2.6cm} L{3.6cm} L{4.4cm} L{1.2cm} L{3.2cm}}
+  \tblhead Tipo (cantidad) & \color{white}\bfseries Unidad de partición & \color{white}\bfseries Justificación & \color{white}\bfseries Reglas & \color{white}\bfseries Quién certifica\\
+  Manuales (3) & Sección, o numeral si los tiene & Se consulta por parámetro o condición, cada uno en su sección & R1, R5 & Área emisora\\
+  Procedimientos (8) & Sección, o numeral si los tiene & Cada numeral es un criterio o una acción citable & R1, R2 & Área emisora\\
+  Normativa (3) & Artículo & El artículo es la unidad con la que se cita una norma & R3 & Área emisora, como responsable interna\\
+  Actas (2) & Numeral & Separa la discusión de las decisiones & R4 & Comité Técnico Operativo\\
+  Comunicaciones (2) & Encabezado; cada anexo aparte & Una recomendación externa no se mezcla con su anexo & R4 & Área emisora, como responsable interna\\
+  Fichas (1) & Sección & Cada tabla describe un aspecto del activo & R1 & Área emisora\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+En todos los tipos, las tablas no se dividen. El contenido previo al primer numeral forma la unidad de su sección.
+
+\subsection{Metadatos mínimos}
+
+Cada fragmento lleva los metadatos de la Tabla~\ref{tab:metadatos}. Los del documento se extraen de su PDF y se contrastan con el registro de vigencia; si no coinciden, el documento no se indexa.
+
+\begin{table}[H]
+\centering
+\caption{Metadatos mínimos por fragmento}\label{tab:metadatos}
+\begin{tabular}{L{3.8cm} L{2.4cm} L{9.4cm}}
+  \tblhead Campo & \color{white}\bfseries Origen & \color{white}\bfseries Para qué sirve\\
+  \texttt{code}, \texttt{version} & PDF & Identificar el documento en la cita\\
+  \texttt{title}, \texttt{document\_type} & PDF & Mostrar la cita y distinguir una norma de un registro\\
+  \texttt{issue\_date}, \texttt{issuing\_area} & PDF & Dar contexto a la cita e identificar al responsable\\
+  \texttt{section\_id}, \texttt{section\_title} & PDF & Citar la sección exacta\\
+  \texttt{parent\_section\_id} & PDF & Recuperar el contexto de la sección padre\\
+  \texttt{fragment\_id} & Ingesta & Obtener el fragmento y hacer reingestas idempotentes\\
+  \texttt{validity\_status} & Registro & Aplicar el filtro de vigencia\\
+  \texttt{injection\_risk} & Ingesta & Retener el contenido marcado (ADR-06)\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Certeza sobre la vigencia}
+
+Ningún documento del corpus declara si está vigente, y leerlo no basta para saberlo. Las reglas del ADR-07 permiten afirmar que cuatro documentos fueron reemplazados o derogados: PRO-MED-007 v1, PRO-OPE-012 v2, PRO-SEG-009 v1 y RES-CREG-0112-2021.
+Sobre los otros quince no hay certeza de que estén vigentes o no, porque ser la última versión no lo demuestra. Los indicios son parciales: el ACTA-CTO-2025-11 menciona en aplicación a PRO-OPE-012 v3 y, de forma indirecta, a PRO-MED-007 v2, pero también advierte que un manual sin identificar dejó de aplicarse (numeral 3.3). Solo el área emisora puede confirmar el estado de cada documento.
+
+\subsection{Marcación de vigencia en el prototipo}\label{sec:marcacion}
+
+Como esto es un prototipo, asumimos que esos quince documentos están vigentes, y los cuatro reemplazados o derogados se marcan como no vigentes por su evidencia. También asumimos que el área emisora es la responsable de cada documento, incluso si su emisor es externo, porque la compañía lo adopta internamente para dar cumplimiento a la normativa. La Tabla~\ref{tab:registro} muestra el resultado.
+
+\begin{longtable}{L{3.3cm} L{1.2cm} L{1.5cm} L{0.9cm} L{1.7cm} L{5.8cm}}
+  \caption{Registro de vigencia}\label{tab:registro}\\
+  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Respaldo & \color{white}\bfseries Evidencia\\
+  \endfirsthead
+  \multicolumn{6}{l}{\small\textit{Tabla~\ref{tab:registro} -- continuación}}\\[2pt]
+  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Respaldo & \color{white}\bfseries Evidencia\\
+  \endhead\bottomrule\endlastfoot
+  MAN-MTO-002 & 1 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
+  MAN-OPE-001 & 3 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
+  MAN-OPE-004 & 2 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
+  PRO-HSE-003 & 4 & Vigente & -- & Presunción & Última versión, sin evidencia en contra\\
+  PRO-MED-007 & 1 & No vigente & R1 & Alto & La v2 la reemplaza\\
+  PRO-MED-007 & 2 & Vigente & -- & Medio & ACTA-CTO-2025-11, num. 3.2\\
+  PRO-OPE-012 & 2 & No vigente & R1 & Alto & La v3 la reemplaza\\
+  PRO-OPE-012 & 3 & Vigente & -- & Alto & ACTA-CTO-2025-11, num. 3.1\\
+  PRO-OPE-021 & 1 & Vigente & -- & Presunción & Única versión, sin evidencia en contra\\
+  PRO-SEG-009 & 1 & No vigente & R2 & Alto & PRO-SEG-015 v1 la reemplaza\\
+  PRO-SEG-015 & 1 & Vigente & -- & Presunción & Sucesor de PRO-SEG-009\\
+  RES-ANH-0471-2023 & -- & Vigente & -- & Presunción & Art. 5; sin derogatoria en el corpus\\
+  RES-CREG-0043-2024 & -- & Vigente & -- & Presunción & Art. 6; declaración propia\\
+  RES-CREG-0112-2021 & -- & No vigente & R3 & Alto & RES-CREG-0043-2024, art. 6\\
+  ACTA-CTO-2025-07 & -- & Vigente & R4 & Presunción & Registro; num. 4.2\\
+  ACTA-CTO-2025-11 & -- & Vigente & R4 & Presunción & Registro; num. 4.2\\
+  COM-PRV-0098 & -- & Vigente & R4 & Presunción & Registro; sección Alcance\\
+  COM-PRV-0134 & -- & Vigente & R4 & Presunción & Registro de proveedor\\
+  FIC-ACT-P101 & 2 & Vigente & -- & Presunción & Última versión, sin evidencia en contra\\
+\end{longtable}

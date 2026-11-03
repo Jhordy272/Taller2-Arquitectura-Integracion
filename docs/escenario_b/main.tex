@@ -1,0 +1,38 @@
+% ================================================================
+%  MAIN – Taller 2 -- Escenario B -- Grupo 4
+%  Compilar: latexmk -pdf main.tex
+% ================================================================
+\documentclass[10pt, letterpaper]{article}
+
+% ── METADATOS ────────────────────────────────────────────────
+\newcommand{\DocTitulo} {Conciliación volumétrica con aprobación humana}
+\newcommand{\DocEntrega}{Taller 2 -- Escenario B -- Grupo 4}
+\input{../comun/metadatos}
+
+\input{../preambulo}
+
+\begin{document}
+
+\input{../comun/portada}
+\clearpage
+
+\tableofcontents
+\clearpage
+
+\phantomsection
+\addcontentsline{toc}{section}{Índice de Tablas}
+\listoftables
+\phantomsection
+\addcontentsline{toc}{section}{Índice de Figuras}
+\listoffigures
+\clearpage
+
+\input{secciones/01_contexto}
+\input{secciones/02_bpmn}
+\input{secciones/03_frontera}
+\input{secciones/04_grafo}
+\input{secciones/05_herramientas}
+\input{secciones/06_seguridad}
+\input{secciones/07_gobierno}
+
+\end{document}

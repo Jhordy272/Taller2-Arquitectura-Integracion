@@ -1,0 +1,215 @@
+% ================================================================
+%  Decisiones de arquitectura
+% ================================================================
+\section{Decisiones de arquitectura}
+
+Las decisiones parten de dos hechos del caso: el corpus es pequeño (19 documentos y unas 5.500
+palabras) y mezcla identificadores exactos con lenguaje natural en español. Además, el grupo adopta
+una restricción de diseño: los documentos son internos de la compañía y su contenido no sale de su
+infraestructura. Los detalles de implementación de cada decisión están en la sección~\ref{sec:solucion}.
+
+\begin{table}[H]
+\centering
+\caption{Resumen de las decisiones}\label{tab:adrs}
+\begin{tabular}{L{1.5cm} L{5.2cm} L{8.8cm}}
+  \tblhead ADR & \color{white}\bfseries Tema & \color{white}\bfseries Decisión\\
+  ADR-01 & Motor vectorial & Motor dedicado: Qdrant\\
+  ADR-02 & Estrategia de partición & Partición según la estructura de cada tipo de documento\\
+  ADR-03 & Composición de la respuesta & Composición determinista, solo con pasajes citados\\
+  ADR-04 & Modelo de embeddings & \texttt{multilingual-e5-small}, local y como dependencia versionada\\
+  ADR-05 & Recuperación & Búsqueda híbrida con filtro obligatorio de vigencia\\
+  ADR-06 & Seguridad de la salida & Control en el servidor, sin delegar la defensa en el cliente\\
+  ADR-07 & Regla de vigencia & Registro de vigencia con el área emisora como autoridad\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-01}{Motor vectorial dedicado frente a extensión de un motor existente}{Aceptada}
+\adrcampo{Contexto}
+La recuperación debe combinar búsqueda semántica y léxica, y aplicar el filtro de vigencia antes o junto con la similitud,
+nunca después. El volumen del corpus no exige un motor especializado: se decide por las garantías de la consulta, no por escala.
+
+\adrcampo{Decisión}
+Usar Qdrant como motor vectorial dedicado.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Extensión vectorial (pgvector). Sería la mejor opción si la organización ya operara PostgreSQL, porque reutiliza su
+  respaldo y su seguridad. Se descarta porque el prototipo no tiene un motor que reutilizar y exigiría más cuidado para garantizar
+  el filtrado previo e integrar la búsqueda léxica.
+  \item Chroma. Es más simple, pero no se confirmó que su versión autogestionada ofrezca la búsqueda híbrida requerida.
+  \item Chroma con un índice léxico externo. Obliga a mantener dos índices sincronizados y a garantizar el filtro en ambos.
+\end{itemize}
+
+\adrcampo{Mejoras}
+La búsqueda semántica, la léxica y el filtro de vigencia quedan en una sola consulta, sin índices que sincronizar.
+
+\adrcampo{Consecuencias}
+Se agrega un servicio a operar. Si PetroAndes estandariza PostgreSQL, esta decisión debe revisarse.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-02}{Estrategia de partición}{Aceptada}
+\adrcampo{Contexto}
+Cada afirmación debe citar documento, versión y sección. Los documentos son cortos (de 188 a 440 palabras) y tienen estructura explícita:
+secciones, numerales, artículos y tablas con umbrales.
+
+\adrcampo{Decisión}
+Partir según la estructura de cada tipo de documento, sin dividir tablas: por sección o numeral en manuales y procedimientos, por artículo en
+normativa, por numeral en actas y por encabezado en comunicaciones y fichas. La respuesta incluye además el contexto de la sección a la que pertenece el fragmento.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Tamaño fijo con solapamiento. Corta tablas y numerales, y sus fragmentos no corresponden a una sección citable.
+  \item Partición semántica. Sus cortes dependen del modelo de embeddings, de modo que cambiarlo alteraría las citas.
+  \item Documento completo. Mezcla temas y no permite citar la sección exacta.
+\end{itemize}
+
+\adrcampo{Mejoras}
+Cada fragmento es una unidad citable, los umbrales conservan su significado, y los cortes son reproducibles e independientes del modelo.
+
+\adrcampo{Consecuencias}
+La calidad depende de reconocer la estructura en los PDF, que es el punto más frágil. Un fragmento puede depender de otro documento, y un documento futuro sin estructura necesitará otra regla.\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-03}{Composición de la respuesta}{Aceptada}
+\adrcampo{Contexto}
+La respuesta debe citar documento, versión y sección en toda afirmación, no usar conocimiento ajeno al contexto recuperado y declarar cuándo la respuesta no está en el corpus.
+
+\adrcampo{Decisión}
+Componer de forma determinista: la respuesta presenta pasajes literales con su cita, o rechaza la consulta si no hay soporte suficiente.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Modelo local. Es la alternativa más cercana: respeta la confidencialidad y permite sintetizar. Se descarta porque puede afirmar algo que el fragmento no sostiene.
+  Se reconsiderará si las preguntas que combinan documentos resultan frecuentes.
+  \item Modelo externo (tier gratuito o Claude). Enviaría documentos internos a un tercero.
+\end{itemize}
+
+\adrcampo{Mejoras}
+\begin{itemize}
+  \item Citas: cada pasaje procede de un fragmento identificado.
+  \item Sin conocimiento externo: no se genera texto.
+  \item Exactitud: umbrales y plazos se muestran tal como están escritos.
+  \item Reproducibilidad: con el mismo índice, la misma consulta produce la misma respuesta.
+\end{itemize}
+
+\adrcampo{Consecuencias}
+Se cede la síntesis: el usuario lee pasajes, no una conclusión, y una pregunta que combine documentos se responde de forma parcial. También cambia la evaluación: como el texto es literal, no hace falta medir si la composición inventó algo. El anclaje mide entonces si los pasajes sustentan la respuesta esperada, es decir, la calidad de la recuperación, junto con la relevancia y la tasa de desviación. Con un modelo generativo, debería medir además si el modelo alucina.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-04}{Modelo de embeddings como dependencia versionada}{Aceptada}
+\adrcampo{Contexto}
+El corpus está en español, y los vectores de un modelo no son comparables con los de otro. Por eso el modelo es una dependencia del sistema, no un detalle de implementación.
+
+\adrcampo{Decisión}
+Usar \texttt{intfloat/multilingual-e5-small}, ejecutado localmente y en una versión fija.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item \texttt{BAAI/bge-m3}. Admite textos más largos, pero es más pesado y esa capacidad no se aprovecha con secciones tan cortas.
+  \item \texttt{paraphrase-multilingual-mpnet-base-v2}. Su longitud máxima truncaría parte de las secciones.
+  \item API de embeddings externa. Enviaría documentos internos a un tercero.
+\end{itemize}
+
+\adrcampo{Mejoras}
+El contenido no sale de la compañía y el modelo no cambia sin una decisión explícita.
+
+\adrcampo{Consecuencias}
+Cambiar el modelo exige reindexar: construir un índice nuevo sin tocar el activo, evaluarlo con los casos de referencia y reemplazar el activo solo si los resultados no empeoran. El índice anterior se conserva como retroceso.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-05}{Recuperación híbrida con filtro obligatorio de vigencia}{Aceptada}
+\adrcampo{Contexto}
+La similitud semántica falla con códigos y números de resolución, y una búsqueda vectorial siempre devuelve algo, aunque no sea pertinente. Además, nunca debe citarse material
+derogado, y ese requisito no puede depender de quien consulta.
+
+\adrcampo{Decisión}
+Combinar búsqueda semántica y léxica, con el filtro de vigencia aplicado siempre por el servidor durante la búsqueda. Si no hay soporte suficiente, la consulta se rechaza. Si se pide un documento excluido, se informa su estado y su sucesor, sin mostrar su contenido.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Solo semántica. No resuelve la búsqueda exacta de códigos, que el enunciado exige.
+  \item Filtrar después de buscar. El enunciado lo prohíbe.
+  \item Búsqueda léxica genérica. Puede deformar identificadores como RES-CREG-0043-2024.
+  \item Fusión ponderada por puntajes. Agrega un parámetro difícil de justificar con pocos casos.
+\end{itemize}
+
+\adrcampo{Mejoras}
+Se encuentran tanto los códigos exactos como las preguntas en lenguaje natural, y ningún cliente puede saltarse la vigencia.
+
+\adrcampo{Consecuencias}
+El historial no es consultable: una auditoría requeriría otra capacidad. El rechazo de preguntas en lenguaje natural depende de un umbral de similitud, que puede fallar en temas cercanos al corpus.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-06}{Defensa ante inyección indirecta y exposición de contenido}{Aceptada}
+\adrcampo{Contexto}
+Un fragmento puede contener instrucciones dirigidas a un sistema automático, y un cliente respaldado por un modelo podría ejecutarlas o enviar el contenido a un tercero. El servidor no puede
+delegar estos riesgos, y el documento malicioso no puede retirarse del corpus.
+
+\adrcampo{Decisión}
+Controlar la salida en el servidor: el contenido con instrucciones se detecta en la ingesta y no se entrega, aunque sí su cita y una alerta. Las herramientas son de solo lectura y, en producción, solo acceden clientes
+autorizados, sin modelos externos.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Delegar la defensa en el cliente. El servidor no controla a sus clientes.
+  \item Solo delimitar el contenido. No impide que el texto malicioso llegue al modelo.
+  \item Clasificador con un modelo. Detectaría paráfrasis, pero el contenido analizado también podría manipularlo.
+  \item Retirar el documento del índice. Impediría citarlo y ocultaría el hallazgo.
+\end{itemize}
+
+\adrcampo{Mejoras}
+El contenido malicioso conocido no llega al cliente, sin importar qué cliente sea, y el documento sigue trazable.
+
+\adrcampo{Consecuencias}
+Las reglas no detectan toda variante, y lo que no se detecta llega al cliente. Un falso positivo retiene contenido legítimo, aunque la alerta permite revisarlo.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-07}{Regla de vigencia de los documentos}{Aceptada}
+\adrcampo{Contexto}
+Ningún documento declara si está vigente, y la vigencia es una decisión de gobierno. El ACTA-CTO-2025-11 reconoce que el listado maestro no está actualizado y establece que, mientras no exista un registro único, certifica el área emisora (numeral 4.2).
+
+\adrcampo{Decisión}
+Mantener un registro de vigencia con el área emisora como autoridad. Primero, estas reglas proponen el estado de cada documento:
+
+\begin{table}[H]
+\centering
+\caption{Reglas de vigencia}\label{tab:vigencia}
+\begin{tabular}{L{3.5cm} L{6.6cm} L{5.4cm}}
+  \tblhead Regla & \color{white}\bfseries Criterio & \color{white}\bfseries Evidencia en el corpus\\
+  R1. Versión sucesora & Una versión nueva del mismo código reemplaza por completo a la anterior & PRO-MED-007 v2 reemplaza a su v1. PRO-OPE-012 v3 reemplaza a su v2\\
+  R2. Reemplazo entre códigos & Un documento reemplaza a otro de código distinto & PRO-SEG-015 v1 deja sin efecto a PRO-SEG-009 v1\\
+  R3. Derogatoria expresa & La resolución posterior deroga a la anterior en su articulado & RES-CREG-0043-2024, art. 6, deroga a RES-CREG-0112-2021\\
+  R4. Sin efecto normativo & Actas y comunicaciones son registros: no cambian un documento hasta que este se emita & ACTA-CTO-2025-07, num. 4.2; COM-PRV-0098, Alcance\\
+  R5. Retiro no documentado & Sin evidencia en el corpus, el estado depende del área emisora & ACTA-CTO-2025-11, num. 3.3: un manual sin identificar dejó de aplicarse\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Las reglas R1 a R3 demuestran que un documento \emph{no} está vigente; ser la última versión no basta para afirmar que sí lo está. Por eso, después, cada propuesta se envía al área emisora del documento, que responde vigente o no vigente. El registro guarda quién respondió, cuándo y con qué soporte, y solo esa respuesta fija el estado:
+\begin{itemize}
+  \item Vigente: el área lo certifica. Se incluye.
+  \item No vigente: el área lo certifica, a partir de evidencia de reemplazo o derogatoria, o de su propio retiro. Se excluye.
+  \item En duda: el área aún no responde. Se excluye mientras tanto.
+\end{itemize}
+Una certificación no es permanente: debe renovarse periódicamente y cuando cambie la evidencia. En el corpus, el respaldo de cada propuesta de vigente es medio o alto solo en PRO-MED-007 v2 y PRO-OPE-012 v3, porque el ACTA-CTO-2025-11 los menciona; en los demás es una presunción.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Solo la versión más alta. No detecta R2, R3 ni R5, y las resoluciones no tienen versión.
+  \item Solo la fecha más reciente. Confunde documentos de temas distintos y no prueba la vigencia.
+  \item Inferirla con un modelo. Convierte una decisión de gobierno en una predicción sin responsable.
+\end{itemize}
+
+\adrcampo{Mejoras}
+Cada estado tiene una regla, una evidencia y un responsable identificado, y el servicio no cita un documento sin certificar.
+
+\adrcampo{Consecuencias}
+La vigencia depende de que las áreas respondan: sin respuesta, el documento no se cita. En el prototipo no hay áreas reales, así que los documentos sin certeza se marcan como vigentes en nombre de su área (sección~\ref{sec:marcacion}). Esto incluye los tres manuales, de modo que el prototipo podría citar el manual retirado que menciona el ACTA-CTO-2025-11, un riesgo que se acepta y se declara.
+\end{adr}

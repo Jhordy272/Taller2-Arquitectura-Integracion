@@ -1,0 +1,158 @@
+% ================================================================
+%  Evaluación
+% ================================================================
+\section{Evaluación}
+
+\subsection{Casos de referencia}
+
+El conjunto está en \texttt{data/reference\_cases.yaml} y lo escribió el grupo. Tiene 46 casos, cada uno con el comportamiento esperado. Las preguntas con respuesta declaran además la respuesta, el fragmento que la contiene y el texto que debe aparecer o no en lo que recibe el usuario, incluida la sección padre.
+
+\begin{table}[H]
+\centering
+\caption{Casos de referencia por tipo}\label{tab:casos}
+\begin{tabular}{L{4.2cm} L{1.4cm} L{10.0cm}}
+  \tblhead Tipo & \color{white}\bfseries Casos & \color{white}\bfseries Comportamiento esperado\\
+  Con respuesta & 22 & Responde con el valor correcto, sin valores derogados\\
+  Fuera del corpus & 9 & Rechaza la consulta\\
+  Identificador existente & 5 & Responde con el fragmento que lo contiene\\
+  Identificador inexistente & 3 & Rechaza la consulta\\
+  Documento excluido & 5 & Informa su estado y su sucesor, sin contenido\\
+  Inyección & 2 & El texto malicioso nunca aparece en la respuesta\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Cada caso declara su origen, porque no todos son igual de independientes: 23 se usaron para elegir el umbral, 5 lo midieron una vez y 18 son nuevos. Solo los 18 nuevos miden sobre casos no vistos, por lo que los resultados deben leerse por origen. El conjunto incluye a propósito los fallos ya conocidos de la sección~\ref{sec:citas-erradas} y de la calibración del umbral: si se excluyeran, las métricas saldrían mejor de lo que el sistema es.
+
+\subsection{Arnés y métricas}
+
+El componente \texttt{evaluation/} ejecuta los casos contra el servidor por MCP, como un cliente real, y guarda la evidencia en \texttt{data/evidence/}. Las métricas deterministas no dependen del juez, de modo que un fallo de este no invalida la medición. El juez es \texttt{laya}, con el checkpoint multilingüe en una revisión fija, ejecutado localmente en CPU.
+
+\begin{table}[H]
+\centering
+\caption{Métricas de la evaluación}\label{tab:metricas}
+\begin{tabular}{L{3.4cm} L{9.6cm} L{2.4cm}}
+  \tblhead Métrica & \color{white}\bfseries Qué mide & \color{white}\bfseries Tipo\\
+  Tasa de desviación & Parte de los casos que no se comportan como se esperaba. El enunciado no la define; esta definición es del grupo & Determinista\\
+  Hit & Parte de los casos en que el fragmento esperado llega, como pasaje o como sección padre & Determinista\\
+  MRR & Qué tan arriba aparece el fragmento esperado entre los pasajes & Determinista\\
+  Latencia & Tiempo de cada llamada, frente a los 5 s del compromiso EI16 & Determinista\\
+  Anclaje & Probabilidad de que el texto recibido sustente la respuesta esperada (tipo \texttt{noul}). Requiere conocer la respuesta, así que solo se puede medir en evaluación, no en operación & \texttt{laya}\\
+  Control del anclaje & La misma medida, con los pasajes de otro caso; valida al juez & \texttt{laya}\\
+  Relevancia & Parte de los pasajes que contienen la respuesta (tipo \texttt{choice}) & \texttt{laya}\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Resultados}
+
+\begin{table}[H]
+\centering
+\caption{Resultados por origen de los casos}\label{tab:resultados-origen}
+\begin{tabular}{L{4.2cm} L{1.2cm} L{1.8cm} L{1.1cm} L{1.1cm} L{1.4cm} L{1.4cm} L{1.6cm}}
+  \tblhead Origen & \color{white}\bfseries Casos & \color{white}\bfseries Desviación & \color{white}\bfseries Hit & \color{white}\bfseries MRR & \color{white}\bfseries Anclaje & \color{white}\bfseries Control & \color{white}\bfseries Relevancia\\
+  Nuevos (más independiente) & 18 & 22~\% & 0,86 & 0,86 & 0,69 & 0,24 & 0,14\\
+  Validación del umbral & 5 & 40~\% & 1,00 & 0,83 & 0,98 & 0,61 & 0,33\\
+  Elección del umbral & 23 & 4~\% & 0,94 & 0,84 & 0,86 & 0,26 & 0,46\\
+  Total & 46 & 15~\% & 0,93 & 0,85 & 0,83 & 0,29 & 0,37\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Resultados por tipo de caso}\label{tab:resultados-tipo}
+\begin{tabular}{L{4.6cm} L{2.0cm} L{2.0cm} L{6.4cm}}
+  \tblhead Tipo & \color{white}\bfseries Fallan & \color{white}\bfseries Desviación & \color{white}\bfseries Tipo de control\\
+  Documento excluido & 0/5 & 0~\% & Regla: registro de vigencia\\
+  Inyección & 0/2 & 0~\% & Regla: retención en el servidor\\
+  Identificador existente & 0/5 & 0~\% & Regla: coincidencia exacta\\
+  Identificador inexistente & 0/3 & 0~\% & Regla: coincidencia exacta\\
+  Con respuesta & 2/22 & 9~\% & Similitud\\
+  Fuera del corpus & 5/9 & 56~\% & Similitud\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+En los casos, la latencia tuvo una mediana de 32 ms, un percentil 95 de 76 ms y un máximo de 137 ms, muy por debajo del compromiso de 5 s. No incluye el arranque del servidor, de unos 13 segundos. Solo se mide un cliente a la vez y sobre un corpus pequeño.
+
+\subsection{Lectura de los resultados}\label{sec:lectura}
+
+Los controles por regla no fallaron; la similitud sí. Los 15 casos que dependen de reglas se comportaron como se esperaba, incluidos los documentos derogados y la inyección. Los siete fallos están en los casos que dependen de la similitud. El dato no prueba que las reglas sean infalibles, porque son pocos casos, pero respalda la decisión de resolver el gobierno con reglas y no con un modelo.
+
+El servicio no sabe decir ``no sé'' en temas cercanos. Rechaza una pregunta sobre el crudo Brent, pero responde con citas a cinco de nueve preguntas fuera del corpus, entre ellas tres de las cuatro nuevas: el plan de contingencia por incendio, las sanciones del regulador y el presupuesto de mantenimiento. Comparten vocabulario con el corpus. Es el fallo más serio: el umbral separó mejor en la calibración (2/12 falsas), cuyas preguntas eran en general más alejadas, y este conjunto incluye a propósito preguntas cercanas. Por eso, ninguna de las dos cifras debe citarse sola.
+
+Los casos ya usados salen mejor. La desviación es de 4~\% en los casos que eligieron el umbral y de 22~\% en los nuevos. Reportar solo el total (15~\%) sería engañoso.
+
+El anclaje distingue, con ruido. Los casos correctos promedian 0,90, y los dos incorrectos, 0,01. El control usa pasajes de otro documento que no contienen la respuesta esperada, y debe puntuar bajo: promedia 0,29 frente a 0,83 del anclaje real, y queda por debajo en 23 de 27 casos. El juez distingue, pero con errores en ambos sentidos: da más de 0,5 a siete controles, cuando sus pasajes no contienen el texto esperado (A05 y A07: 1,00), y menos de 0,5 a dos respuestas correctas (A21: 0,08; I01: 0,17). Este valor es orientativo. Una primera versión del control tomaba el caso vecino, a menudo del mismo documento y con la respuesta en sus pasajes; se corrigió porque invalidaba esa comparación.
+
+La reproducibilidad se midió y se corrigió. Al repetir una primera evaluación con el mismo índice, ningún caso cambió de resultado, pero sí el orden de algunos pasajes, lo que contradecía el ADR-03. Se observaban fragmentos con el mismo puntaje de RRF, y el motor no garantiza un orden entre ellos. Se agregó un desempate por identificador antes de cortar los resultados. Después, dos ejecuciones con arranques separados del servidor dieron pasajes y orden idénticos en los 46 casos (\texttt{evaluation\_reproducibility.csv}). Son dos ejecuciones sobre un corpus fijo, no una prueba de que nunca varíe. La misma corrección mostró la fragilidad del juez: solo por cambiar el orden del texto, el anclaje de A05 pasó de 0,78 a 0,29.
+
+La relevancia de \texttt{laya} no es confiable aquí. El valor de 0,37 parece muy malo, pero 9 de los 25 casos correctos obtienen 0, incluso cuando el único pasaje contiene la respuesta exacta (A19, I05). Parte del valor bajo es real, porque la respuesta incluye pasajes sobrantes; otra parte es un error del juez, que el grupo no puede separar con estos datos. Se usa \texttt{laya} como pide el enunciado, pero las conclusiones se apoyan en las métricas deterministas. El propio autor de \texttt{laya} reporta un rendimiento limitado sin ajuste fino.
+
+\subsection{Valores inaceptables en operación}
+
+Estos valores son una propuesta del grupo, no un requisito del enunciado.
+
+\begin{table}[H]
+\centering
+\caption{Valores inaceptables propuestos}\label{tab:inaceptables}
+\begin{tabular}{L{6.2cm} L{2.6cm} L{2.4cm} L{3.8cm}}
+  \tblhead Indicador & \color{white}\bfseries Inaceptable & \color{white}\bfseries Medido & \color{white}\bfseries Estado\\
+  Exposición de documentos excluidos & Cualquiera & 0/5 & Cumple\\
+  Exposición de contenido malicioso & Cualquiera & 0/2 & Cumple\\
+  Respuesta falsa fuera del corpus & Más de 5~\% & 56~\% & No cumple\\
+  Respuesta con el pasaje equivocado & Más de 2~\% & 9~\% & No cumple\\
+  Hit en casos nuevos & Menos de 0,95 & 0,86 & No cumple\\
+  Anclaje (orientativo) & Menos de 0,90 & 0,83 & No cumple\\
+  Latencia máxima & Más de 5 s & 137 ms & Cumple\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Conclusión: el prototipo cumple los controles de gobierno, pero no está listo para operar sin supervisión. Con estos resultados, debe usarse como apoyo de búsqueda, con la cita como elemento central, y no como fuente directa de una respuesta.
+
+\subsection{Comparación con la partición de tamaño fijo}\label{sec:particion}
+
+Como anticipó el ADR-02, los mismos casos se ejecutaron sobre una colección de ventanas fijas de 120 palabras con solapamiento de 20, con el mismo servicio y el mismo umbral.
+
+\begin{table}[H]
+\centering
+\caption{Partición estructural frente a tamaño fijo}\label{tab:particion}
+\begin{tabular}{L{6.4cm} L{3.2cm} L{3.2cm}}
+  \tblhead Indicador & \color{white}\bfseries Estructural & \color{white}\bfseries Tamaño fijo\\
+  Fragmentos & 112 & 43\\
+  Desviación total & 7/46 (15~\%) & 8/46 (17~\%)\\
+  Fallos con respuesta & 2/22 & 6/22\\
+  Fallos fuera del corpus & 5/9 & 2/9\\
+  Citan una sección del documento & Sí & No\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+La diferencia total es muy pequeña y no demuestra que la partición estructural sea mejor en todo. Responde mejor las preguntas válidas, pero rechaza peor las de fuera del corpus. Además, el umbral se calibró con la partición estructural, lo que la favorece. El Hit de la partición fija no se compara, porque sus fragmentos no tienen el identificador esperado.
+
+La decisión del ADR-02 se mantiene por dos motivos que esta medición no reemplaza: la exigencia de citar la sección, que una ventana fija no permite, y la retención precisa. Con ventanas fijas, el detector marcó dos fragmentos de COM-PRV-0134, lo que retendría también contenido legítimo.
+
+\subsection{Resultado: citas verdaderas que no responden la pregunta}\label{sec:citas-erradas}
+
+Al revisar manualmente las respuestas, se encontró un fallo que las pruebas automáticas no detectan. En dos preguntas que el corpus sí responde, el servicio devuelve pasajes literales y bien citados que no contienen la respuesta o la ponen después de otra que no aplica. La cita es verdadera; lo que el usuario puede concluir, no. El arnés marca la primera como fallo (A14) y la segunda como acierto (A15), porque el plan sí aparece.
+
+\begin{table}[H]
+\centering
+\caption{Preguntas respondidas con el pasaje equivocado}\label{tab:citas-erradas}
+\begin{tabular}{L{3.6cm} L{3.6cm} L{4.4cm} L{3.6cm}}
+  \tblhead Pregunta & \color{white}\bfseries Respuesta correcta & \color{white}\bfseries Lo que devuelve el servicio & \color{white}\bfseries Riesgo\\
+  ¿Cuál es la máxima presión de operación admisible del tramo Ayacucho -- Coveñas? & 1.250 psi (MAN-OPE-001 v3, 3.1) & Propuesta de umbral de 1.200 a 1.100 psi (ACTA-CTO-2025-07, 3.2), inventario de válvulas (MAN-MTO-002 v1, 2) y umbrales de alarma (PRO-OPE-012 v3, 3.1) & Tomar un umbral de alarma por un límite de diseño, confusión contra la que advierte el propio manual\\
+  ¿Con qué frecuencia se lubrican los sellos de las válvulas? & Semestral (MAN-MTO-002 v1, 3) & Primero, la recomendación de cuatro meses del fabricante (COM-PRV-0098); después, el plan vigente & Tomar una recomendación externa, que no modifica el plan, por el plan vigente\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Causa. El umbral decide si hay soporte, no si el pasaje es el correcto. En la presión, el fragmento correcto queda por debajo (0,8323); en la lubricación, lo supera (0,8424), pero la recomendación se parece más a la pregunta.
+
+Qué garantiza el diseño y qué no. La composición determinista del ADR-03 impide inventar texto y alterar valores, pero no impide mostrar un pasaje equivocado. El anclaje lo señala en evaluación (A14: 0,00), porque se compara con la respuesta esperada; en operación esa respuesta no existe, así que nada lo detecta.
+
+Con un modelo como cliente. En una prueba con Claude (sección~\ref{sec:contrato-mcp}), la misma pregunta por la máxima presión recibió los mismos pasajes. El modelo notó que no respondían, buscó de nuevo con el término técnico MAOP y llegó a 1.250 psi, citando MAN-OPE-001 v3 y advirtiendo que no debía confundirse con el umbral de alarma. El servicio por sí solo sigue fallando: esa corrección viene del cliente, que usó su conocimiento del término para reformular. Es una sola ejecución, depende del modelo y no puede ser la defensa del servicio. Sí es un argumento para el Escenario B: juzgar si un pasaje responde y reformular es una función que justifica un enfoque agéntico, mientras que la vigencia y la retención deben seguir en el servidor.
+
+Decisión. El fallo se reporta y no se corrige por ahora. Ajustar reglas para estas dos preguntas, ya conocidas, mejoraría la demostración sin mostrar cuánto falla el sistema. Estos casos entran al conjunto de referencia, de modo que el arnés mida con qué frecuencia ocurre. Con esa medición se evaluarán medidas como priorizar los documentos operativos sobre los registros.

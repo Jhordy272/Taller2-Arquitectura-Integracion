@@ -1,0 +1,46 @@
+% ================================================================
+%  Lectura del pipeline con patrones EIP
+% ================================================================
+\section{Lectura del pipeline con patrones EIP}
+
+La Tabla~\ref{tab:eip} nombra cada etapa implementada con su patrón de Hohpe \& Woolf.
+
+\begin{longtable}{L{3.2cm} L{3.8cm} L{3.8cm} L{4.2cm}}
+  \caption{Etapas del pipeline y patrones EIP}\label{tab:eip}\\
+  \tblhead Etapa & \color{white}\bfseries Implementación & \color{white}\bfseries Patrón & \color{white}\bfseries Por qué\\
+  \endfirsthead
+  \multicolumn{4}{l}{\small\textit{Tabla~\ref{tab:eip} -- continuación}}\\[2pt]
+  \tblhead Etapa & \color{white}\bfseries Implementación & \color{white}\bfseries Patrón & \color{white}\bfseries Por qué\\
+  \endhead\bottomrule\endlastfoot
+  \multicolumn{4}{l}{\textbf{Ingesta}}\\
+  Lectura de los PDF & \texttt{PdfRepository} & Channel Adapter & Conecta el archivo con el flujo\\
+  Estructura común & \texttt{SectionParser}, \texttt{ExtractedDocument} & Normalizer, Canonical Data Model & Lleva distintos tipos de documento a un solo modelo\\
+  Verificación & \texttt{ExtractionVerifier} & Message Filter & Deja pasar solo los documentos correctos\\
+  Partición & \texttt{Partitioner} & Splitter & Un documento produce varios fragmentos\\
+  Vigencia y vectores & Copia del registro, \texttt{Embedding\-Repository}, \texttt{Lexical\-Tokenizer} & Content Enricher & Agrega al fragmento datos de otras fuentes\\
+  Marca de inyección & \texttt{InjectionDetector} & Content Enricher & Agrega una marca, sin decidir la entrega\\
+  Carga idempotente & \texttt{QdrantRepository}, identificador determinista & Idempotent Receiver & Reingerir no duplica\\
+  Cambio de vigencia & \texttt{--sync-validity} & Event-Driven Consumer (diseño); hoy, ejecución manual & En producción reaccionaría a un evento\\
+  \multicolumn{4}{l}{\textbf{Consulta}}\\
+  Herramientas MCP & \texttt{DocumentTools} & Service Activator, Request-Reply & El protocolo invoca el servicio y espera su respuesta\\
+  Documento excluido, rechazo o respuesta & \texttt{ResponseComposer} & Content-Based Router & El contenido define la ruta\\
+  Filtro de vigencia & \texttt{\_VALID\_ONLY} & Selective Consumer & Solo se consideran los fragmentos vigentes\\
+  Ramas semántica y léxica & Consulta híbrida & Scatter-Gather & Una consulta va a dos ramas, y se reúnen sus resultados\\
+  Fusión RRF & Qdrant, \texttt{stable\_order} & Aggregator & Combina los resultados en una sola lista\\
+  Retención de contenido & \texttt{\_content} & Content Filter & Quita el texto y conserva la cita\\
+  Sección padre & \texttt{\_parent\_context} & Content Enricher & Agrega la sección a la respuesta\\
+  Cita & Identificador \texttt{code@version\#section} & Correlation Identifier & Une la respuesta con su fragmento de origen\\
+\end{longtable}
+
+\subsection{Dónde la analogía deja de sostenerse}
+
+\begin{itemize}
+  \item No hay mensajes. El pipeline es un proceso por lotes y llamadas síncronas dentro de un programa. No hay canales, colas ni consumidores independientes, de modo que no tiene las garantías que esos patrones suponen, como entrega garantizada o desacoplamiento temporal.
+  \item La decisión es probabilística. Un Content-Based Router clásico evalúa una condición exacta. Con preguntas en lenguaje natural, la ruta depende de una similitud y un umbral calibrado: el mismo tipo de mensaje puede tomar otra ruta con otras palabras. Por eso aparecen respuestas falsas en temas cercanos.
+  \item La transformación no es reversible. Un Message Translator conserva el significado. Un embedding pierde información y no permite reconstruir el texto, ni explicar por qué dos textos se parecen.
+  \item La fusión no correlaciona. Un Aggregator reúne partes de un mismo mensaje hasta completarlo. RRF mezcla dos clasificaciones por posición, y no sabe si el resultado está completo o es correcto.
+  \item El Filter no juzga significado. El filtro de vigencia es exacto; la pertinencia no lo es. Que un fragmento pase el umbral no significa que responda la pregunta (sección~\ref{sec:citas-erradas}).
+  \item No existe un Invalid Message Channel. Un documento rechazado solo queda en el log, sin canal para reprocesarlo.
+\end{itemize}
+
+El vocabulario sirve para las etapas de datos e integración, donde la analogía es útil: partición, enriquecimiento, idempotencia. Deja de servir donde interviene la similitud, que es precisamente donde está la mayoría de los fallos medidos.

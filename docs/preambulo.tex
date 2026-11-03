@@ -1,0 +1,188 @@
+% ================================================================
+%  PREAMBULO – Universidad de los Andes  |  Taller 2
+%  Basado en la plantilla de documentos (Parcial 1, v8.0)
+%  Compilar desde la carpeta del documento: latexmk -pdf main.tex
+% ================================================================
+
+% ── IDIOMA ───────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext, newtxmath}   % Times: trazo más grueso y legible
+\usepackage[spanish, es-noshorthands]{babel}
+\addto\captionsspanish{
+  \renewcommand{\tablename}{Tabla}
+  \renewcommand{\listtablename}{Índice de Tablas}
+  \renewcommand{\listfigurename}{Índice de Figuras}
+  \renewcommand{\contentsname}{Tabla de Contenido}
+}
+
+% ── MÁRGENES ─────────────────────────────────────────────────
+\usepackage[
+  top=2.5cm, bottom=2.5cm,
+  left=2.5cm, right=2.5cm,
+  headheight=14pt
+]{geometry}
+
+% ── ENCABEZADO Y PIE ─────────────────────────────────────────
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\newcommand{\estilopagina}{%
+  \fancyhf{}%
+  \renewcommand{\headrulewidth}{0.4pt}%
+  \renewcommand{\footrulewidth}{0.4pt}%
+  \fancyhead[L]{\small\textit{\DocCurso}}%
+  \fancyhead[R]{\small\textit{\DocInstitucion}}%
+  \fancyfoot[L]{\small\DocEntrega}%
+  \fancyfoot[R]{\small\textbf{Pág.~\thepage~/~\pageref{LastPage}}}%
+}
+\pagestyle{fancy}
+\estilopagina
+% Los índices usan el estilo plain: mismo encabezado y pie
+\fancypagestyle{plain}{\estilopagina}
+
+% ── PÁGINAS HORIZONTALES ─────────────────────────────────────
+\usepackage{pdflscape}
+\usepackage{tikz}
+\usepackage{everypage}
+
+\newif\ifinlscape
+\inlscapefalse
+
+% Encabezado y pie para páginas horizontales (arriba y abajo en vista landscape)
+\AddEverypageHook{%
+  \ifinlscape
+    \begin{tikzpicture}[remember picture, overlay]
+      % Encabezado en la parte superior de la página horizontal
+      \node[rotate=90, anchor=center, inner sep=2pt]
+        at ([xshift=1.5cm]current page.west)
+        {\parbox{\dimexpr\paperheight-5cm\relax}%
+         {\small\itshape\DocCurso\hfill\DocInstitucion}};
+      % Pie en la parte inferior de la página horizontal
+      \node[rotate=90, anchor=center, inner sep=2pt]
+        at ([xshift=-1.5cm]current page.east)
+        {\parbox{\dimexpr\paperheight-5cm\relax}%
+         {\small\DocEntrega\hfill\textbf{Pág.~\thepage~/~\pageref{LastPage}}}};
+    \end{tikzpicture}%
+  \fi%
+}
+
+\newenvironment{pagehorizontal}{%
+  \begin{landscape}%
+  \inlscapetrue%
+  \pagestyle{empty}%
+}{%
+  \end{landscape}%
+  \inlscapefalse%
+  \pagestyle{fancy}%
+}
+
+% ── MATEMÁTICAS ──────────────────────────────────────────────
+\usepackage{amsmath}
+
+% ── GRÁFICOS Y TIKZ ──────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\graphicspath{{../assets/}{./}}
+\usetikzlibrary{shapes, shapes.multipart, shapes.misc, arrows, arrows.meta,
+                positioning, shadows, calc, fit}
+
+% ── TABLAS ───────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{adjustbox}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+\renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{4pt}
+
+% Encabezado de fila oscuro
+\newcommand{\tblhead}{\rowcolor[gray]{0.25}\color{white}\bfseries}
+
+% ── CAPTIONS ─────────────────────────────────────────────────
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf, labelsep=period, skip=3pt}
+\usepackage{chngcntr}
+\counterwithout{table}{section}
+\counterwithout{figure}{section}
+
+% ── SECCIONES ────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\section}
+  {\normalsize\bfseries}{\thesection.}{0.5em}{}
+  [\vspace{1pt}\rule{\linewidth}{0.4pt}]
+\titleformat{\subsection}
+  {\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalsize\itshape}{\thesubsubsection.}{0.4em}{}
+\titlespacing{\section}      {0pt}{10pt}{4pt}
+\titlespacing{\subsection}   {0pt}{8pt}{3pt}
+\titlespacing{\subsubsection}{0pt}{6pt}{2pt}
+
+% ── ÍNDICE ───────────────────────────────────────────────────
+\usepackage{tocloft}
+\setlength{\cftbeforesecskip}{3pt}
+\setlength{\cftbeforesubsecskip}{1pt}
+
+% ── LISTAS ───────────────────────────────────────────────────
+\usepackage{enumitem}
+\setlist[itemize]  {leftmargin=1.2em, itemsep=0pt, topsep=2pt, parsep=0pt}
+\setlist[enumerate]{leftmargin=1.2em, itemsep=0pt, topsep=2pt, parsep=0pt}
+
+% ── CAJAS ────────────────────────────────────────────────────
+\usepackage[many]{tcolorbox}
+\newtcolorbox{notebox}[1][]{
+  enhanced, breakable, arc=0pt,
+  colback=white, colframe=black,
+  leftrule=2pt, toprule=0pt, bottomrule=0pt, rightrule=0pt,
+  fonttitle=\bfseries\small, title={#1}, coltitle=black, colbacktitle=white,
+  left=6pt, right=4pt, top=3pt, bottom=3pt,
+  before skip=4pt, after skip=4pt
+}
+% Contenido por redactar; buscar \pendiente antes de entregar
+\newcommand{\pendiente}[1]{\begin{notebox}[Pendiente]\small #1\end{notebox}}
+
+% ── CÓDIGO Y CONTRATOS ───────────────────────────────────────
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Listado}
+\lstdefinelanguage{json}{morestring=[b]", sensitive=true}
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  columns=fullflexible, keepspaces=true,
+  breaklines=true, showstringspaces=false,
+  frame=leftline, xleftmargin=8pt, framexleftmargin=6pt,
+  captionpos=b, upquote=true,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {¿}{{?`}}1 {¡}{{!`}}1
+}
+
+% ── ADR ──────────────────────────────────────────────────────
+% \begin{adr}{ADR-01}{Título}{Aceptada} \adrcampo{Contexto} texto ... \end{adr}
+\newenvironment{adr}[3]{%
+  \subsection{#1: #2}%
+  \noindent\textbf{Estado:} #3\par
+}{\par\medskip}
+\newcommand{\adrcampo}[1]{\par\smallskip\noindent\textbf{#1.}\ }
+
+% ── HIPERVÍNCULOS ────────────────────────────────────────────
+\usepackage{hyperref}
+\hypersetup{
+  hidelinks,
+  pdftitle  = {\DocTitulo},
+  pdfauthor = {\DocGrupo},
+  pdfsubject= {\DocCurso}
+}
+
+% ── OTROS ────────────────────────────────────────────────────
+\usepackage{csquotes}
+\newcommand{\secdiv}{\vspace{3pt}\rule{\linewidth}{0.3pt}\vspace{3pt}}

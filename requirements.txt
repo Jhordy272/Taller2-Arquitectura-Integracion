@@ -1,0 +1,19 @@
+# Vector database
+qdrant-client==1.20.0
+
+# Ingestion
+pdfplumber==0.11.10
+pyyaml==6.0.3
+
+# Embeddings
+sentence-transformers==6.2.0
+
+# MCP server
+mcp==2.3.0
+
+# Evaluation
+laya==0.4.21
+
+# Configuration and tests
+pydantic-settings==2.16.2
+pytest==9.2.0

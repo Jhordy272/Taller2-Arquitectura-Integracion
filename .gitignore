@@ -1,0 +1,30 @@
+# Entorno de Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Variables locales y secretos
+.env
+.env.*
+!.env.example
+
+# Datos generados: se reconstruyen con la ingesta
+qdrant_storage/
+
+# Modelos de IA descargados
+/.cache/
+/models/
+
+# Organización interna
+TAREAS.md
+
+# Editor y sistema
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Configuración local de Claude Code
+.claude/settings.local.json
