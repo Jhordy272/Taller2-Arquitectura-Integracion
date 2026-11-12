@@ -1,5 +1,6 @@
 """Environment-driven settings for the MCP server."""
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -24,6 +25,11 @@ class Settings(BaseSettings):
 
     # Chosen by app/calibrate_threshold.py; re-evaluate with new reference cases.
     rejection_cosine_threshold: float = 0.84
+
+    # Against "no sé" (LexicalGuard), adopted after the holdout experiment; "none" reproduces the baseline.
+    answer_guard: Literal["none", "lexical"] = "lexical"
+    # The passage must mention at least this share of the question's content terms.
+    guard_min_coverage: float = 0.5
 
 
 settings = Settings()

@@ -1,0 +1,165 @@
+{
+  "overall": {
+    "cases": 66,
+    "deviation_rate": 0.0909,
+    "outcomes": {
+      "correct": 60,
+      "wrong_answer": 3,
+      "false_answer": 3
+    },
+    "hit_rate": 0.9118,
+    "mrr": 0.8392,
+    "anchoring": null,
+    "anchoring_control": null,
+    "relevance": null
+  },
+  "by_origin": {
+    "holdout": {
+      "cases": 17,
+      "deviation_rate": 0.0588,
+      "outcomes": {
+        "correct": 16,
+        "false_answer": 1
+      },
+      "hit_rate": 1.0,
+      "mrr": 0.8857,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "new": {
+      "cases": 21,
+      "deviation_rate": 0.1429,
+      "outcomes": {
+        "correct": 18,
+        "wrong_answer": 1,
+        "false_answer": 2
+      },
+      "hit_rate": 0.8571,
+      "mrr": 0.8571,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "validation": {
+      "cases": 5,
+      "deviation_rate": 0.0,
+      "outcomes": {
+        "correct": 5
+      },
+      "hit_rate": 1.0,
+      "mrr": 0.8333,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "tuning": {
+      "cases": 23,
+      "deviation_rate": 0.087,
+      "outcomes": {
+        "correct": 21,
+        "wrong_answer": 2
+      },
+      "hit_rate": 0.8824,
+      "mrr": 0.8137,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    }
+  },
+  "by_kind": {
+    "answerable": {
+      "cases": 29,
+      "deviation_rate": 0.1034,
+      "outcomes": {
+        "correct": 26,
+        "wrong_answer": 3
+      },
+      "hit_rate": 0.8966,
+      "mrr": 0.8115,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "out_of_corpus": {
+      "cases": 19,
+      "deviation_rate": 0.1053,
+      "outcomes": {
+        "correct": 17,
+        "false_answer": 2
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "identifier": {
+      "cases": 5,
+      "deviation_rate": 0.0,
+      "outcomes": {
+        "correct": 5
+      },
+      "hit_rate": 1.0,
+      "mrr": 1.0,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "unknown_identifier": {
+      "cases": 3,
+      "deviation_rate": 0.0,
+      "outcomes": {
+        "correct": 3
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "excluded": {
+      "cases": 7,
+      "deviation_rate": 0.0,
+      "outcomes": {
+        "correct": 7
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "in_doubt_content": {
+      "cases": 1,
+      "deviation_rate": 1.0,
+      "outcomes": {
+        "false_answer": 1
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "injection": {
+      "cases": 2,
+      "deviation_rate": 0.0,
+      "outcomes": {
+        "correct": 2
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    }
+  },
+  "latency_ms": {
+    "median": 25.8,
+    "p95": 60.3,
+    "max": 131.2,
+    "commitment": 5000.0,
+    "within_commitment": true
+  }
+}

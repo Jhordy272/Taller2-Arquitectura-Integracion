@@ -4,6 +4,7 @@ from app.repositories.QdrantSearchRepository import QdrantSearchRepository
 from app.repositories.QueryEmbeddingRepository import QueryEmbeddingRepository
 from app.repositories.RegistryRepository import RegistryRepository
 from app.services.HybridSearchService import HybridSearchService, ensure_compatible
+from app.services.LexicalGuard import LexicalGuard
 from app.services.LexicalTokenizer import LexicalTokenizer
 from app.services.ResponseComposer import ResponseComposer
 from app.services.ValidityRegistry import ReloadingValidityRegistry
@@ -39,4 +40,5 @@ def build_composer(registry: ReloadingValidityRegistry | None = None) -> Respons
         registry or build_registry(),
         settings.rejection_cosine_threshold,
         settings.default_result_limit,
+        LexicalGuard(LexicalTokenizer(), settings.guard_min_coverage) if settings.answer_guard == "lexical" else None,
     )

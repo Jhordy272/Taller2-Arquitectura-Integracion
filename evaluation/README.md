@@ -16,6 +16,11 @@ python -m app.main --no-judge
 # Comprobar que dos ejecuciones den lo mismo
 python -m app.main --reproducibility
 
+# Experimento del "no sé": la variante sin guarda (baseline) y con guarda léxica (por defecto).
+# En bash: ANSWER_GUARD=none python -m app.main ...; en PowerShell: $env:ANSWER_GUARD = "none"
+ANSWER_GUARD=none python -m app.main --no-judge --label mitigation_none
+python -m app.main --no-judge --label mitigation_lexical
+
 # Comparar con la partición de tamaño fijo
 cd ../ingestion
 python -m app.main --baseline

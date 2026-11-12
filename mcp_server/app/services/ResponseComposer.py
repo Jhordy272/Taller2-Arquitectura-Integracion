@@ -4,6 +4,7 @@ from app.models.Answer import Answer, Citation, Content, ExcludedDocument, Passa
 from app.models.RetrievedFragment import RetrievedFragment, SearchOutcome
 from app.repositories.QdrantSearchRepository import QdrantSearchRepository
 from app.services.HybridSearchService import HybridSearchService
+from app.services.LexicalGuard import LexicalGuard
 from app.services.QueryAnalyzer import contains_identifier, extract_identifiers
 from app.services.ValidityRegistry import IN_DOUBT, VALID, ReloadingValidityRegistry, ValidityRegistry
 
@@ -27,12 +28,14 @@ class ResponseComposer:
         registry: ValidityRegistry | ReloadingValidityRegistry,
         cosine_threshold: float,
         max_passages: int,
+        guard: LexicalGuard | None = None,
     ) -> None:
         self._search_service = search_service
         self._repository = repository
         self._registry = registry
         self._cosine_threshold = cosine_threshold
         self._max_passages = max_passages
+        self._guard = guard
 
     def answer(self, query: str) -> Answer:
         """Excluded documents are checked first, so they are reported, not just omitted."""
@@ -47,7 +50,7 @@ class ResponseComposer:
             selected = self._select_by_identifier(outcome, identifiers)
             refusal = MESSAGE_UNKNOWN_IDENTIFIER
         else:
-            selected = self._select_by_similarity(outcome)
+            selected = self._select_by_similarity(query, outcome)
             refusal = MESSAGE_NO_SUPPORT
 
         if not selected:
@@ -79,14 +82,25 @@ class ResponseComposer:
         ]
         return matching[: self._max_passages]
 
-    def _select_by_similarity(self, outcome: SearchOutcome) -> list[RetrievedFragment]:
-        """RRF scores only rank, so the cosine of the dense branch decides the support."""
+    def _select_by_similarity(self, query: str, outcome: SearchOutcome) -> list[RetrievedFragment]:
+        """RRF scores only rank, so the cosine of the dense branch decides the support,
+        and the guard, when enabled, whether the passage covers the question."""
         cosine = {fragment.fragment_id: fragment.score for fragment in outcome.dense}
-        return [
+        near = [
             fragment
             for fragment in outcome.hybrid
             if cosine.get(fragment.fragment_id, 0.0) >= self._cosine_threshold
         ]
+        if self._guard is None:
+            return near
+        return [fragment for fragment in near if self._guard.supports(query, self._text_with_parent(fragment))]
+
+    def _text_with_parent(self, fragment: RetrievedFragment) -> str:
+        """The text the user will see: the passage and the section its numeral belongs to."""
+        if fragment.parent_section_id is None:
+            return fragment.indexed_text
+        parent = self._repository.get_fragment(f"{fragment.code}@{fragment.version}#{fragment.parent_section_id}")
+        return fragment.indexed_text if parent is None else f"{fragment.indexed_text}\n{parent.indexed_text}"
 
     def _answered(self, query: str, fragments: list[RetrievedFragment]) -> Answer:
         selected_ids = {fragment.fragment_id for fragment in fragments}
