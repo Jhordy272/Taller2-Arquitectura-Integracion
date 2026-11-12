@@ -186,6 +186,27 @@ Lectura y límites:
   ADR-08 Contrato MCP & Pistas \texttt{ttlMs} y \texttt{cacheScope} declaradas por método en el constructor del servidor. Resources en \texttt{app/resources/ValidityResources.py}, con el mismo registro vivo que las herramientas. \texttt{server/discover} y el middleware de OpenTelemetry los provee el SDK.\\
 \end{longtable}
 
+\subsection{Instanciación de las decisiones}
+
+La Tabla~\ref{tab:instanciacion} ubica cada decisión en el elemento del repositorio que la implementa. Los nombres son los del código: los repositorios encapsulan una dependencia externa (archivo, PDF, Qdrant, modelo) y los servicios contienen las reglas.
+
+\begin{longtable}{L{1.5cm} L{5.6cm} L{8.4cm}}
+  \caption{Elementos de software que implementan cada decisión}\label{tab:instanciacion}\\
+  \tblhead ADR & \color{white}\bfseries Elemento & \color{white}\bfseries Responsabilidad\\
+  \endfirsthead
+  \multicolumn{3}{l}{\small\textit{Tabla~\ref{tab:instanciacion} -- continuación}}\\[2pt]
+  \tblhead ADR & \color{white}\bfseries Elemento & \color{white}\bfseries Responsabilidad\\
+  \endhead\bottomrule\endlastfoot
+  ADR-01 & \texttt{ingestion/.../QdrantRepository}, \texttt{mcp\_server/.../QdrantSearchRepository} & Escribir y consultar la colección, con alias para activarla\\
+  ADR-02 & \texttt{SectionParser}, \texttt{Partitioner} & Reconocer la estructura y producir fragmentos citables\\
+  ADR-03 & \texttt{ResponseComposer} & Componer pasajes literales con cita, o rechazar\\
+  ADR-04 & \texttt{EmbeddingRepository}, \texttt{QueryEmbeddingRepository}, \texttt{ensure\_compatible} & Fijar modelo y revisión, y negarse a arrancar con una colección incompatible\\
+  ADR-05 & \texttt{HybridSearchService}, \texttt{LexicalTokenizer}, \texttt{LexicalGuard} & Búsqueda híbrida filtrada, rama léxica y guarda de soporte\\
+  ADR-06 & \texttt{InjectionDetector}, \texttt{ResponseComposer.\_content} & Marcar en la ingesta y retener en la salida\\
+  ADR-07 & \texttt{data/validity\_registry.yaml}, \texttt{ValidityRegistry}, \texttt{ReloadingValidityRegistry} & Fuente de verdad de la vigencia, leída en vivo\\
+  ADR-08 & \texttt{DocumentTools}, \texttt{ValidityResources}, \texttt{main.cache\_hints} & Contrato MCP: herramientas, resources y pistas de caché\\
+\end{longtable}
+
 \subsection{Evidencia de cada decisión}
 
 \begin{table}[H]

@@ -204,6 +204,44 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
 \begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/fragment_excluded.png}\captionof{figure}{Versión reemplazada, sin contenido}\label{fig:mcp-fragment-excluded}\end{minipage}
 \end{figure}
 
+\subsection{Catálogo de contratos}
+
+La Tabla~\ref{tab:catalogo} reúne los contratos del servicio: los del prototipo y los dos eventos de producción, que siguen en diseño.
+
+\begin{longtable}{L{3.4cm} L{2.4cm} L{2.6cm} L{2.6cm} L{4.6cm}}
+  \caption{Catálogo de contratos}\label{tab:catalogo}\\
+  \tblhead Contrato & \color{white}\bfseries Productor & \color{white}\bfseries Consumidor & \color{white}\bfseries Mecanismo & \color{white}\bfseries Esquema\\
+  \endfirsthead
+  \multicolumn{5}{l}{\small\textit{Tabla~\ref{tab:catalogo} -- continuación}}\\[2pt]
+  \tblhead Contrato & \color{white}\bfseries Productor & \color{white}\bfseries Consumidor & \color{white}\bfseries Mecanismo & \color{white}\bfseries Esquema\\
+  \endhead\bottomrule\endlastfoot
+  \texttt{search\_documents}, \texttt{get\_fragment} & \texttt{mcp\_server} & Cliente MCP, \texttt{evaluation} & MCP, \texttt{tools/call} & JSON Schema de entrada y salida, generado del código\\
+  \texttt{petroandes://validity/...} & \texttt{mcp\_server} & Aplicación o usuario & MCP, \texttt{resources/read} & JSON del registro (sección anterior)\\
+  Registro de vigencia & Gerencia de Cumplimiento y áreas emisoras & \texttt{ingestion}, \texttt{mcp\_server} & Archivo YAML versionado & \texttt{schema\_version} 1; entradas con código, versión, estado, regla, evidencia y certificación\\
+  Colección del índice & \texttt{ingestion} & \texttt{mcp\_server} & Qdrant, alias \texttt{corpus\_active} & Payload del fragmento (Tabla~\ref{tab:metadatos}) y metadatos de versiones de la colección\\
+  \texttt{DocumentValidityChanged} (diseño) & Registro corporativo & \texttt{mcp\_server}, \texttt{ingestion} & CloudEvents sobre el backbone del Taller 1 & Listado~\ref{lst:evento}\\
+  \texttt{DocumentPublished} (diseño) & Sistema documental & \texttt{ingestion} & CloudEvents sobre el backbone del Taller 1 & Código, versión, ubicación y hash del PDF\\
+\end{longtable}
+
+\begin{lstlisting}[language=json, caption={Evento de cambio de vigencia (diseño)}, label={lst:evento}]
+{
+  "specversion": "1.0",
+  "type": "co.petroandes.documents.validity.changed.v1",
+  "source": "/registro-vigencia",
+  "id": "c2b1...-uuid",
+  "time": "2026-11-12T15:04:05Z",
+  "subject": "MAN-OPE-004@2",
+  "datacontenttype": "application/json",
+  "data": {
+    "code": "MAN-OPE-004", "version": "2",
+    "previous_status": "valid", "status": "in_doubt",
+    "certification_state": "pending", "certified_by": null,
+    "certifying_authority": "Gerencia de Medición",
+    "superseded_by": null, "evidence": "ACTA-CTO-2025-11, num. 3.3"
+  }
+}
+\end{lstlisting}
+
 \subsection{Prueba con Claude como cliente}
 
 Como prueba adicional, se registró el servidor en Claude Code, que usó el modelo Claude Opus 5.5, y se hicieron cinco consultas, con la instrucción de usar solo las herramientas y no leer archivos. Esta prueba se admite solo porque el corpus es sintético (ADR-06). Es una sola ejecución: muestra un comportamiento posible, no una garantía.
