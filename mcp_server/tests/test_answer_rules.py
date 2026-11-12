@@ -45,8 +45,9 @@ class FakeSearch:
         self.outcome = outcome
         self.calls = 0
 
-    def search(self, query: str, limit: int) -> SearchOutcome:
+    def search(self, query: str, limit: int, excluded=()) -> SearchOutcome:
         self.calls += 1
+        self.excluded = excluded
         return self.outcome
 
 

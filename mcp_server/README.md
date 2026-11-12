@@ -25,11 +25,15 @@ python -m app.compare "K 061+800"
 # Medir los umbrales de rechazo y guardar la evidencia en data/evidence/
 python -m app.calibrate_threshold
 
+# Medir cuánto tarda un cambio de vigencia en llegar a las respuestas, sin reiniciar.
+# Usa una copia temporal del registro; la evidencia queda en data/evidence/
+python -m app.measure_propagation
+
 # Todas las pruebas
 python -m pytest
 
 # Solo las que no requieren Qdrant
-python -m pytest tests/test_contracts.py tests/test_answer_rules.py tests/test_mcp_tools.py
+python -m pytest tests/test_contracts.py tests/test_answer_rules.py tests/test_mcp_tools.py tests/test_registry_reload.py
 ```
 
 La configuración está en `app/config/Settings.py`, y se puede cambiar con un archivo `.env`, a partir de `.env.example`.

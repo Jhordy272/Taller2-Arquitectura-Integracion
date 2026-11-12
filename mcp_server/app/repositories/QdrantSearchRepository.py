@@ -1,4 +1,6 @@
 """Runs filtered searches against the active collection (ADR-01, ADR-05)."""
+from collections.abc import Sequence
+
 from qdrant_client import QdrantClient, models
 
 from app.models.RetrievedFragment import RetrievedFragment, SearchOutcome
@@ -10,6 +12,23 @@ SPARSE_VECTOR = "lexical"
 _VALID_ONLY = models.Filter(
     must=[models.FieldCondition(key="validity_status", match=models.MatchValue(value="valid"))]
 )
+
+
+def validity_filter(excluded: Sequence[tuple[str, str]] = ()) -> models.Filter:
+    """The payload filter, plus the documents the live registry excludes: a validity change
+    applies to the search even before its payload is synchronized (ADR-05, ADR-07)."""
+    return models.Filter(
+        must=_VALID_ONLY.must,
+        must_not=[
+            models.Filter(
+                must=[
+                    models.FieldCondition(key="code", match=models.MatchValue(value=code)),
+                    models.FieldCondition(key="version", match=models.MatchValue(value=version)),
+                ]
+            )
+            for code, version in excluded
+        ],
+    )
 
 
 def stable_order(fragments: list[RetrievedFragment]) -> list[RetrievedFragment]:
@@ -33,18 +52,20 @@ class QdrantSearchRepository:
         sparse_vector: tuple[list[int], list[float]],
         candidates: int,
         limit: int,
+        excluded: Sequence[tuple[str, str]] = (),
     ) -> SearchOutcome:
         """Run hybrid, dense and lexical searches in one batch, each with the filter
         inside every branch, so that the filter applies during the search."""
-        branches = [self._dense_branch(dense_vector, candidates)]
+        validity = validity_filter(excluded)
+        branches = [self._dense_branch(dense_vector, candidates, validity)]
         if sparse_vector[0]:
-            branches.append(self._lexical_branch(sparse_vector, candidates))
+            branches.append(self._lexical_branch(sparse_vector, candidates, validity))
 
         requests = [
             models.QueryRequest(
                 prefetch=branches,
                 query=models.FusionQuery(fusion=models.Fusion.RRF),
-                filter=_VALID_ONLY,
+                filter=validity,
                 # Every fused candidate: the cut to the limit must happen after the stable sort.
                 limit=candidates * len(branches),
                 with_payload=True,
@@ -52,7 +73,7 @@ class QdrantSearchRepository:
             models.QueryRequest(
                 query=dense_vector,
                 using=DENSE_VECTOR,
-                filter=_VALID_ONLY,
+                filter=validity,
                 limit=candidates,
                 with_payload=True,
             ),
@@ -62,7 +83,7 @@ class QdrantSearchRepository:
                 models.QueryRequest(
                     query=models.SparseVector(indices=sparse_vector[0], values=sparse_vector[1]),
                     using=SPARSE_VECTOR,
-                    filter=_VALID_ONLY,
+                    filter=validity,
                     limit=candidates,
                     with_payload=True,
                 )
@@ -85,14 +106,16 @@ class QdrantSearchRepository:
         )
         return self._to_fragment(points[0], score=0.0) if points else None
 
-    def _dense_branch(self, dense_vector: list[float], candidates: int) -> models.Prefetch:
-        return models.Prefetch(query=dense_vector, using=DENSE_VECTOR, filter=_VALID_ONLY, limit=candidates)
+    def _dense_branch(self, dense_vector: list[float], candidates: int, validity: models.Filter) -> models.Prefetch:
+        return models.Prefetch(query=dense_vector, using=DENSE_VECTOR, filter=validity, limit=candidates)
 
-    def _lexical_branch(self, sparse_vector: tuple[list[int], list[float]], candidates: int) -> models.Prefetch:
+    def _lexical_branch(
+        self, sparse_vector: tuple[list[int], list[float]], candidates: int, validity: models.Filter
+    ) -> models.Prefetch:
         return models.Prefetch(
             query=models.SparseVector(indices=sparse_vector[0], values=sparse_vector[1]),
             using=SPARSE_VECTOR,
-            filter=_VALID_ONLY,
+            filter=validity,
             limit=candidates,
         )
 

@@ -5,7 +5,7 @@ from app.models.RetrievedFragment import RetrievedFragment, SearchOutcome
 from app.repositories.QdrantSearchRepository import QdrantSearchRepository
 from app.services.HybridSearchService import HybridSearchService
 from app.services.QueryAnalyzer import contains_identifier, extract_identifiers
-from app.services.ValidityRegistry import IN_DOUBT, VALID, ValidityRegistry
+from app.services.ValidityRegistry import IN_DOUBT, VALID, ReloadingValidityRegistry, ValidityRegistry
 
 MESSAGE_ANSWERED = "Pasajes literales del corpus, con su cita. No se generó texto adicional."
 MESSAGE_NO_SUPPORT = "La respuesta no está en el corpus vigente."
@@ -24,7 +24,7 @@ class ResponseComposer:
         self,
         search_service: HybridSearchService,
         repository: QdrantSearchRepository,
-        registry: ValidityRegistry,
+        registry: ValidityRegistry | ReloadingValidityRegistry,
         cosine_threshold: float,
         max_passages: int,
     ) -> None:
@@ -36,11 +36,12 @@ class ResponseComposer:
 
     def answer(self, query: str) -> Answer:
         """Excluded documents are checked first, so they are reported, not just omitted."""
-        excluded = self._registry.excluded_mentions(query)
+        registry = self._registry.current()
+        excluded = registry.excluded_mentions(query)
         if excluded:
             return self._excluded_answer(query, excluded)
 
-        outcome = self._search_service.search(query, self._max_passages)
+        outcome = self._search_service.search(query, self._max_passages, registry.not_valid_keys())
         identifiers = extract_identifiers(query)
         if identifiers:
             selected = self._select_by_identifier(outcome, identifiers)
@@ -56,11 +57,12 @@ class ResponseComposer:
     def get_fragment(self, code: str, version: str, section_id: str) -> Answer:
         """Return one fragment under the same validity and retention rules as a search."""
         query = f"{code}@{version}#{section_id}"
-        entry = self._registry.entry(code, version)
+        registry = self._registry.current()
+        entry = registry.entry(code, version)
         if entry is None:
             return Answer(status="not_found", query=query, message=MESSAGE_FRAGMENT_NOT_FOUND)
         if entry["status"] != VALID:
-            return self._excluded_answer(query, [self._registry.excluded(entry)])
+            return self._excluded_answer(query, [registry.excluded(entry)])
 
         fragment = self._repository.get_fragment(query)
         if fragment is None:

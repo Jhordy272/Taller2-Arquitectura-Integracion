@@ -6,7 +6,7 @@ from app.repositories.RegistryRepository import RegistryRepository
 from app.services.HybridSearchService import HybridSearchService, ensure_compatible
 from app.services.LexicalTokenizer import LexicalTokenizer
 from app.services.ResponseComposer import ResponseComposer
-from app.services.ValidityRegistry import ValidityRegistry
+from app.services.ValidityRegistry import ReloadingValidityRegistry
 
 
 def build_search_service() -> tuple[HybridSearchService, QdrantSearchRepository]:
@@ -31,7 +31,7 @@ def build_composer() -> ResponseComposer:
     return ResponseComposer(
         service,
         repository,
-        ValidityRegistry(RegistryRepository(settings.validity_registry_path).load()),
+        ReloadingValidityRegistry(RegistryRepository(settings.validity_registry_path), settings.registry_check_interval_s),
         settings.rejection_cosine_threshold,
         settings.default_result_limit,
     )

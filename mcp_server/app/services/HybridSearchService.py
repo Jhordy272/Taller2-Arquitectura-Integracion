@@ -1,5 +1,7 @@
 """Combines the query encoders with the filtered search, and checks at startup that
 the active collection was built with the same model and tokenizer (ADR-04)."""
+from collections.abc import Sequence
+
 from app.models.RetrievedFragment import SearchOutcome
 from app.repositories.QdrantSearchRepository import QdrantSearchRepository
 from app.repositories.QueryEmbeddingRepository import QueryEmbeddingRepository
@@ -23,12 +25,13 @@ class HybridSearchService:
         self._tokenizer = tokenizer
         self._branch_candidates = branch_candidates
 
-    def search(self, query: str, limit: int) -> SearchOutcome:
+    def search(self, query: str, limit: int, excluded: Sequence[tuple[str, str]] = ()) -> SearchOutcome:
         return self._repository.search(
             dense_vector=self._embeddings.embed(query),
             sparse_vector=self._tokenizer.query_vector(query),
             candidates=max(self._branch_candidates, limit),
             limit=limit,
+            excluded=excluded,
         )
 
 

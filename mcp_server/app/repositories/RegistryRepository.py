@@ -11,3 +11,7 @@ class RegistryRepository:
     def load(self) -> list[dict]:
         registry = yaml.safe_load(self._path.read_text(encoding="utf-8"))
         return registry["documents"]
+
+    def modified_at(self) -> int:
+        """Modification time in nanoseconds: tells whether the file changed since the last read."""
+        return self._path.stat().st_mtime_ns

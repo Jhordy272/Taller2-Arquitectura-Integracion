@@ -80,3 +80,13 @@ def test_query_with_only_stopwords_still_returns_semantic_results(service):
     outcome = service.search("de la en", limit=3)
     assert outcome.lexical == []
     assert len(outcome.hybrid) == 3
+
+
+def test_a_document_excluded_by_the_live_registry_is_filtered_during_the_search(service):
+    """Its payload still says valid: the exclusion comes from the registry, before any sync."""
+    query = "VL-CC-022"
+    assert "MAN-MTO-002" in {fragment.code for fragment in service.search(query, limit=ALL_FRAGMENTS).lexical}
+
+    outcome = service.search(query, limit=ALL_FRAGMENTS, excluded=[("MAN-MTO-002", "1")])
+    for fragment in [*outcome.hybrid, *outcome.dense, *outcome.lexical]:
+        assert fragment.code != "MAN-MTO-002"

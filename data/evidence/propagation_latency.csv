@@ -1,0 +1,11 @@
+run,change,latency_ms,polls
+1,valid -> in_doubt,1111.5,15
+1,in_doubt -> valid,1978.8,27
+2,valid -> in_doubt,2018.7,27
+2,in_doubt -> valid,2035.3,27
+3,valid -> in_doubt,1991.8,27
+3,in_doubt -> valid,2047.6,27
+4,valid -> in_doubt,1987.6,26
+4,in_doubt -> valid,2010.8,26
+5,valid -> in_doubt,2021.1,27
+5,in_doubt -> valid,2016.4,25
