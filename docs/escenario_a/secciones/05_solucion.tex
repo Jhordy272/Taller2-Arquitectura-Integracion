@@ -40,7 +40,7 @@ La solución tiene tres componentes y una base vectorial. Todos corren en la zon
   \tblhead Componente & \color{white}\bfseries Qué hace & \color{white}\bfseries Tecnología\\
   \texttt{ingestion} & Extrae y verifica los PDF, parte los documentos, marca el contenido con instrucciones y carga los fragmentos & \texttt{pdfplumber}, \texttt{sentence-transformers}\\
   Qdrant & Guarda vectores y metadatos, y filtra por vigencia durante la búsqueda & Qdrant 1.20 en Docker\\
-  \texttt{mcp\_server} & Busca, compone la respuesta o la rechaza, y expone dos herramientas & SDK de MCP para Python, en \texttt{stdio}\\
+  \texttt{mcp\_server} & Busca, compone la respuesta o la rechaza, y expone dos herramientas y el registro de vigencia como resource & SDK de MCP para Python (revisión 2026-07-28), en \texttt{stdio}\\
   \texttt{evaluation} & Mide el servicio por MCP con los casos de referencia & \texttt{laya}, cliente MCP\\
   Registro de vigencia & Declara el estado, la regla y la evidencia de cada documento & Archivo YAML versionado\\
   \bottomrule
@@ -61,9 +61,10 @@ La solución tiene tres componentes y una base vectorial. Todos corren en la zon
 \subsection{Flujo de una consulta}
 
 \begin{enumerate}
-  \item Documentos excluidos: si la consulta nombra uno, responde con su estado y su sucesor, sin contenido.
-  \item Búsqueda: combina las ramas semántica y léxica, con el filtro de vigencia dentro de cada una (ADR-05).
-  \item Soporte: un identificador debe aparecer completo; una pregunta debe superar el umbral de similitud. Si no, rechaza la consulta.
+  \item Registro vivo: toma la versión vigente del registro, que se relee si el archivo cambió (sección~\ref{sec:actualizacion}).
+  \item Documentos excluidos: si la consulta nombra uno, responde con su estado y su sucesor, o con el área que debe certificarlo si está en duda, sin contenido.
+  \item Búsqueda: combina las ramas semántica y léxica, con el filtro de vigencia dentro de cada una, que incluye los documentos que el registro vivo excluye (ADR-05).
+  \item Soporte: un identificador debe aparecer completo; una pregunta debe superar el umbral de similitud, y el pasaje debe mencionar al menos la mitad de sus términos (guarda léxica). Si no, rechaza la consulta.
   \item Composición: devuelve pasajes literales con su cita y la sección padre (ADR-02 y ADR-03).
   \item Retención: un fragmento marcado devuelve su cita y una alerta, sin su texto (ADR-06).
 \end{enumerate}
@@ -179,9 +180,10 @@ Lectura y límites:
   ADR-02 Partición & Identificador determinista \texttt{code@version\#section}; los documentos sin versión usan \texttt{unversioned}. Sin solapamiento. El contenido previo al primer numeral, como una tabla, forma la unidad de la sección. El texto indexado se antecede con los títulos del documento y de la sección. El contexto de la sección padre se entrega en un campo aparte, con su cita, y no se indexa.\\
   ADR-03 Respuesta & El contenido se entrega como dato, en un campo separado y marcado como no confiable. Los rechazos y las alertas son avisos fijos del sistema.\\
   ADR-04 Embeddings & Revisión del modelo fijada en Hugging Face, con los prefijos \texttt{query:} y \texttt{passage:}. Cada colección registra modelo, revisión, dimensiones y versiones de la partición, del tokenizador y de las reglas de detección. El servidor no arranca si el modelo no coincide con el de la colección. Cambiar cualquiera de esos componentes exige una reindexación azul-verde mediante alias; un cambio de vigencia no la requiere. Los pasos están en el README.\\
-  ADR-05 Recuperación & Vectores dispersos con ponderación IDF y tokenizador propio, que normaliza tildes y mayúsculas, y conserva cada identificador completo además de sus partes. Fusión con Reciprocal Rank Fusion. El filtro \texttt{validity\_status = valid} se declara en cada rama y no es un parámetro de la herramienta. Como RRF ordena pero no mide pertinencia, el rechazo usa dos reglas: un identificador debe aparecer completo en el fragmento, y una pregunta en lenguaje natural debe superar un umbral de similitud coseno, calibrado en la sección~\ref{sec:calibracion}. La consulta conserva los identificadores completos, y sus partes solo existen en lo indexado.\\
+  ADR-05 Recuperación & Vectores dispersos con ponderación IDF y tokenizador propio, que normaliza tildes y mayúsculas, y conserva cada identificador completo además de sus partes. Fusión con Reciprocal Rank Fusion. El filtro \texttt{validity\_status = valid}, más la exclusión de los pares documento--versión que el registro vivo no da por vigentes, se declara en cada rama y no es un parámetro de la herramienta. Como RRF ordena pero no mide pertinencia, el rechazo usa dos reglas: un identificador debe aparecer completo en el fragmento, y una pregunta en lenguaje natural debe superar un umbral de similitud coseno, calibrado en la sección~\ref{sec:calibracion}, y además mencionar al menos la mitad de sus términos de contenido, con raíz de cinco letras (\texttt{LexicalGuard}, sección~\ref{sec:mitigacion}). La consulta conserva los identificadores completos, y sus partes solo existen en lo indexado.\\
   ADR-06 Seguridad & Reglas deterministas en la ingesta marcan cada fragmento con \texttt{injection\_risk} y el motivo. La retención cubre las dos herramientas y el contexto de la sección padre, y se aplica después del filtro de vigencia. El prototipo usa transporte local.\\
-  ADR-07 Vigencia & El registro está en \texttt{data/validity\_registry.yaml}, con los estados \texttt{valid}, \texttt{not\_valid} e \texttt{in\_doubt}. Cada entrada declara estado propuesto y efectivo, regla, evidencia, autoridad y datos de certificación (\texttt{certification\_state}: \texttt{assumed}, \texttt{simulated} o \texttt{pending}). La ingesta copia el estado en cada fragmento; un cambio de vigencia solo actualiza ese campo, sin recalcular vectores, con \texttt{--sync-validity}.\\
+  ADR-07 Vigencia & El registro está en \texttt{data/validity\_registry.yaml}, con los estados \texttt{valid}, \texttt{not\_valid} e \texttt{in\_doubt}. Cada entrada declara estado propuesto y efectivo, regla, evidencia, autoridad y datos de certificación (\texttt{certification\_state}: \texttt{assumed}, \texttt{simulated} o \texttt{pending}). La ingesta copia el estado en cada fragmento. El servidor relee el registro cuando cambia y lo aplica a la búsqueda sin reiniciarse; \texttt{--sync-validity} alinea el estado guardado, sin recalcular vectores.\
+  ADR-08 Contrato MCP & Pistas \texttt{ttlMs} y \texttt{cacheScope} declaradas por método en el constructor del servidor. Resources en \texttt{app/resources/ValidityResources.py}, con el mismo registro vivo que las herramientas. \texttt{server/discover} y el middleware de OpenTelemetry los provee el SDK.\\
 \end{longtable}
 
 \subsection{Evidencia de cada decisión}

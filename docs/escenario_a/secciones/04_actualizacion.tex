@@ -1,7 +1,7 @@
 % ================================================================
 %  Mecanismo de actualización
 % ================================================================
-\section{Mecanismo de actualización}
+\section{Mecanismo de actualización}\label{sec:actualizacion}
 
 La carga inicial es una consolidación: una lectura por lotes de todo el corpus hacia la base vectorial. El mantenimiento es una propagación: cada cambio debe llegar al índice con una latencia comprometida.
 
@@ -13,7 +13,7 @@ Un cambio de vigencia se separa de un cambio de contenido, porque tienen riesgos
 \begin{tabular}{L{2.4cm} L{2.2cm} L{4.0cm} L{3.4cm} L{2.6cm}}
   \tblhead Cambio & \color{white}\bfseries Forma & \color{white}\bfseries Cómo se entera en producción & \color{white}\bfseries En el prototipo & \color{white}\bfseries Latencia comprometida\\
   Carga inicial o reindexación & Consolidación & Decisión de despliegue o de un cambio de versión (ADR-04) & \texttt{python -m app.main} & Sin compromiso: se hace en una colección aparte\\
-  Cambio de vigencia & Propagación & El registro publica un evento \texttt{Document\-Validity\-Changed} al certificar el área emisora & \texttt{python -m app.main} \texttt{--sync-validity}, manual & 15 minutos (p95)\\
+  Cambio de vigencia & Propagación & El registro publica un evento \texttt{Document\-Validity\-Changed} al certificar el área emisora & El servidor relee el registro al cambiar el archivo; medido: 2,05 s como máximo & 15 minutos (p95)\\
   Documento o versión nueva & Propagación & El sistema documental publica un evento \texttt{Document\-Published} con su hash & \texttt{python -m app.main}, manual & 1 día hábil\\
   \bottomrule
 \end{tabular}
@@ -21,7 +21,18 @@ Un cambio de vigencia se separa de un cambio de contenido, porque tienen riesgos
 
 Los eventos usarían el backbone del Taller 1, como CloudEvents con esquema registrado, en la zona IT. Si el sistema documental no puede publicarlos, la alternativa es consultar periódicamente sus hashes. Los 15 minutos se alinean con la frescura del escenario DE02 del Proyecto 1, y el día hábil es una propuesta del grupo.
 
-En el prototipo no hay eventos: la detección es manual y las latencias son compromisos de diseño. Lo único medido es la escritura en el índice: sincronizar los 19 documentos tardó 0,68 s.
+\subsection{Propagación de la vigencia en el prototipo}
+
+El registro de vigencia es la fuente de verdad (ADR-07), y el servidor lo aplica en dos puntos sin reiniciarse:
+
+\begin{itemize}
+  \item Lectura viva del registro. \texttt{mcp\_server} comprueba, como máximo cada 2 segundos, si el archivo cambió, y lo relee. Si el archivo está a medio escribir y no se puede leer, conserva el último registro válido y reintenta en la siguiente comprobación.
+  \item Filtro durante la búsqueda. Además del estado guardado en cada fragmento, la consulta a Qdrant excluye los pares documento--versión que el registro vivo no da por vigentes. El filtro se sigue aplicando dentro de la búsqueda, no después. Así, un cambio de vigencia no depende de que alguien ejecute \texttt{--sync-validity}; ese comando solo alinea el estado guardado en Qdrant, que queda como segunda barrera.
+\end{itemize}
+
+La latencia se midió de punta a punta con \texttt{python -m app.measure\_propagation}: desde que se escribe el archivo hasta la primera respuesta que refleja el cambio, en ambos sentidos (excluir y restituir un documento), cinco veces cada uno. La mediana fue de 2,0 s y el máximo de 2,05 s (\texttt{data/evidence/propagation\_latency.csv}), acotados por el intervalo de comprobación. Un cliente puede añadir hasta 2 s más, porque el registro se declara reutilizable por ese tiempo (sección~\ref{sec:contrato-mcp}).
+
+Lo medido es el tramo del servidor. Los 15 minutos de producción incluyen además la entrega del evento desde el registro corporativo, que el prototipo no tiene: siguen siendo un compromiso de diseño, con un margen amplio sobre el tramo medido.
 
 \subsection{Comportamiento durante un cambio}
 
@@ -34,6 +45,6 @@ En el prototipo no hay eventos: la detección es manual y las latencias son comp
 \subsection{Límites}
 
 \begin{itemize}
-  \item Registro y servidor. \texttt{mcp\_server} lee el registro al arrancar, así que tras un cambio debe reiniciarse. Hasta entonces, el filtro de búsqueda ya aplica el nuevo estado, pero el aviso de documento excluido puede estar desactualizado. En producción, el evento también debe actualizar esta lectura.
+  \item Un solo servidor. La lectura del archivo sirve para una instancia que comparte disco con el registro. Con varias réplicas, cada una debe consumir el evento \texttt{DocumentValidityChanged}, o leer el registro desde un servicio común.
   \item Una falla en la propagación. Si el evento se pierde, el índice queda desactualizado sin que nadie lo note. En producción se requiere entrega garantizada y una conciliación periódica entre el registro y el índice.
 \end{itemize}

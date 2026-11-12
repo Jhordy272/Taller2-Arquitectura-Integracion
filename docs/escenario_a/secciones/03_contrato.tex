@@ -52,7 +52,11 @@ Sobre los otros quince no hay certeza de que estén vigentes o no, porque ser la
 
 \subsection{Marcación de vigencia en el prototipo}\label{sec:marcacion}
 
-Como esto es un prototipo, asumimos que esos quince documentos están vigentes, y los cuatro reemplazados o derogados se marcan como no vigentes por su evidencia. También asumimos que el área emisora es la responsable de cada documento, incluso si su emisor es externo, porque la compañía lo adopta internamente para dar cumplimiento a la normativa. La Tabla~\ref{tab:registro} muestra el resultado.
+Como esto es un prototipo, sin áreas reales que respondan, simulamos la respuesta de cada área emisora. Los cuatro documentos reemplazados o derogados se marcan como no vigentes por su evidencia. De los quince restantes, catorce se asumen vigentes en nombre de su área, y uno queda \emph{en duda}: MAN-OPE-004 v2, el manual de medición. Su área no ha certificado su vigencia, y el ACTA-CTO-2025-11 (numeral 3.3) advierte que un manual sin identificar dejó de aplicarse. Así, el corpus real muestra el tercer estado del ADR-07: el documento queda excluido de la búsqueda, no se entrega su contenido y la respuesta informa qué área debe certificarlo (sección~\ref{sec:contrato-mcp}).
+
+Se eligió MAN-OPE-004 entre los tres manuales en conflicto porque ningún caso de referencia depende de él: marcar MAN-MTO-002 habría invalidado los casos de identificadores, y MAN-OPE-001, la pregunta por la MAOP. Los otros dos manuales siguen asumidos como vigentes, de modo que el riesgo de citar el manual retirado se reduce, pero no desaparece.
+
+También asumimos que el área emisora es la responsable de cada documento, incluso si su emisor es externo, porque la compañía lo adopta internamente para dar cumplimiento a la normativa. La Tabla~\ref{tab:registro} muestra el resultado.
 
 \begin{longtable}{L{3.3cm} L{1.2cm} L{1.5cm} L{0.9cm} L{1.7cm} L{5.8cm}}
   \caption{Registro de vigencia}\label{tab:registro}\\
@@ -63,7 +67,7 @@ Como esto es un prototipo, asumimos que esos quince documentos están vigentes, 
   \endhead\bottomrule\endlastfoot
   MAN-MTO-002 & 1 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
   MAN-OPE-001 & 3 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
-  MAN-OPE-004 & 2 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
+  MAN-OPE-004 & 2 & En duda & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3; sin certificar\\
   PRO-HSE-003 & 4 & Vigente & -- & Presunción & Última versión, sin evidencia en contra\\
   PRO-MED-007 & 1 & No vigente & R1 & Alto & La v2 la reemplaza\\
   PRO-MED-007 & 2 & Vigente & -- & Medio & ACTA-CTO-2025-11, num. 3.2\\

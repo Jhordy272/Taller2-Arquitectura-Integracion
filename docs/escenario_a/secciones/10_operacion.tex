@@ -1,0 +1,87 @@
+% ================================================================
+%  Despliegue, costo y gobierno operativo
+% ================================================================
+\section{Despliegue, costo y gobierno operativo}\label{sec:operacion}
+
+El prototipo corre en un equipo, con el servidor MCP por \texttt{stdio}. Esta sección responde dónde correría en producción, cuánto costaría y qué pasa cuando el área emisora no certifica un documento.
+
+\subsection{Dónde corre}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  nivel/.style={draw, minimum width=14.6cm, minimum height=0.9cm, anchor=west, font=\scriptsize},
+  caja/.style={draw, rounded corners=2pt, fill=white, align=center, font=\tiny, minimum height=0.55cm},
+  flecha/.style={-{Latex[length=4pt]}, thin}
+]
+  \node[nivel, fill=gray!8] (n4) at (0,0) {};
+  \node[nivel, fill=gray!20] (n35) at (0,-1.0) {};
+  \node[nivel, fill=gray!35] (n3) at (0,-2.0) {};
+  \node[font=\scriptsize\bfseries, anchor=west] at (0.1,0) {Nivel 4 -- Zona IT};
+  \node[font=\scriptsize\bfseries, anchor=west] at (0.1,-1.0) {Nivel 3.5 -- DMZ industrial};
+  \node[font=\scriptsize\bfseries, anchor=west] at (0.1,-2.0) {Niveles 3 a 0 -- OT};
+  \node[caja] (gw)  at (5.2,0) {Gateway TLS\\+ OAuth};
+  \node[caja] (mcp) at (7.6,0) {\texttt{mcp\_server}};
+  \node[caja] (qd)  at (9.7,0) {Qdrant};
+  \node[caja] (ing) at (11.7,0) {\texttt{ingestion}};
+  \node[caja] (doc) at (13.7,0) {Sistema\\documental};
+  \node[caja] (dmz) at (9.7,-1.0) {Datos publicados (Taller 1)};
+  \node[caja] (scada) at (9.7,-2.0) {SCADA, DCS, historiadores};
+  \draw[flecha] (gw) -- (mcp);
+  \draw[flecha] (mcp) -- (qd);
+  \draw[flecha] (ing) -- (qd);
+  \draw[flecha] (doc) -- (ing);
+  \draw[thick, dashed] (6.3,-0.5) -- (14.6,-0.5);
+  \node[font=\tiny, anchor=south east] at (14.6,-0.5) {sin conexión del Escenario A};
+\end{tikzpicture}
+\caption{Ubicación del servicio en el modelo Purdue}\label{fig:purdue}
+\end{figure}
+
+\begin{itemize}
+  \item Zona. Todos los componentes corren en la zona IT (nivel 4), junto al sistema documental del que leen. El corpus es información corporativa, no datos de proceso: el servicio no cruza la DMZ industrial ni se conecta a OT, como exige la restricción del Taller 1.
+  \item Transporte. En producción, el servidor MCP pasa de \texttt{stdio} a Streamable HTTP, el transporte remoto de MCP, detrás de un gateway con TLS. El modo de respuesta en flujo (\emph{Server-Sent Events}) es opcional dentro de ese transporte y no hace falta para respuestas cortas como estas.
+  \item Autorización. El servidor actúa como servidor de recursos OAuth 2.1, según la autorización de MCP. Los tokens los emite el proveedor de identidad corporativo, con el servidor como audiencia y un alcance de solo lectura (por ejemplo, \texttt{documents.read}). Solo acceden clientes aprobados (ADR-06), y el registro de vigencia hereda la misma autorización.
+  \item Red. Qdrant y la ingesta no tienen exposición fuera de la red privada del servicio; solo el gateway es alcanzable por los clientes.
+\end{itemize}
+
+\subsection{Costo mensual}
+
+La Tabla~\ref{tab:costo} da un orden de magnitud para una nube pública, con estos supuestos: un uso interno de cientos de consultas al día, una sola réplica, los embeddings calculados en CPU dentro del propio contenedor y la composición determinista. No hay costo por token, porque ningún modelo generativo interviene (ADR-03 y ADR-04). Los valores son aproximados y deben confirmarse con la calculadora del proveedor elegido antes de presupuestar.
+
+\begin{table}[H]
+\centering
+\caption{Orden de magnitud del costo mensual en nube pública}\label{tab:costo}
+\begin{tabular}{L{4.0cm} L{6.6cm} L{2.6cm}}
+  \tblhead Componente & \color{white}\bfseries Supuesto & \color{white}\bfseries USD/mes\\
+  \texttt{mcp\_server} & Contenedor siempre activo, 1 vCPU y 2 GB, por el modelo de embeddings (unos 470 MB más el entorno de ejecución) & 30 a 60\\
+  Qdrant & Contenedor de 1 vCPU y 2 GB con disco persistente, o el plan pequeño de su servicio gestionado & 30 a 80\\
+  Gateway con TLS & Balanceador o API gateway administrado & 15 a 30\\
+  \texttt{ingestion} & Tarea bajo demanda, minutos al mes & menos de 5\\
+  Almacenamiento y registros & PDF, colecciones de respaldo y logs & 5 a 15\\
+  \textbf{Total} & & \textbf{80 a 190}\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+El orden de magnitud es de cien dólares al mes. Si PetroAndes ya opera un clúster de contenedores o máquinas virtuales en su centro de datos, el costo marginal es menor, porque el servicio cabe en la capacidad existente. Lo que haría subir la cifra no es el volumen de consultas, sino agregar réplicas por disponibilidad, o cambiar a un modelo generativo con costo por token.
+
+\subsection{Si el área emisora no certifica}
+
+El ADR-07 ya fija la consecuencia: un documento sin certificar queda en duda y no se cita. Lo que falta definir es cuándo se pide la certificación, cuánto dura y a quién se escala. La propuesta del grupo se apoya en el ACTA-CTO-2025-11, que asigna la certificación al área emisora (numeral 4.2) y encarga a la Gerencia de Cumplimiento proponer un registro único (numeral 4.1).
+
+\begin{table}[H]
+\centering
+\caption{Ciclo de certificación propuesto}\label{tab:certificacion}
+\begin{tabular}{L{3.4cm} L{8.6cm} L{3.6cm}}
+  \tblhead Momento & \color{white}\bfseries Regla & \color{white}\bfseries Responsable\\
+  Documento nuevo o cambio de evidencia & Entra en duda y se solicita la certificación al área emisora, con la propuesta de las reglas R1 a R5 & Gerencia de Cumplimiento\\
+  Plazo de respuesta & 10 días hábiles. Mientras tanto, el documento sigue excluido & Área emisora\\
+  Sin respuesta en el plazo & Se escala al Comité Técnico Operativo en su siguiente sesión, con la lista de documentos en duda tomada del resource del registro & Gerencia de Cumplimiento\\
+  Renovación & Cada certificación vence a los 12 meses, o antes si cambia la evidencia; al vencer, el documento vuelve a estar en duda & Área emisora\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Ante la pregunta de qué pasa si el sistema que certifica no existe: hoy no existe, y el registro versionado del repositorio cumple ese papel. Cada cambio de estado es un cambio revisable del archivo, que deja quién lo hizo y cuándo, y el servidor lo aplica en segundos sin reiniciarse (sección~\ref{sec:actualizacion}). Cuando exista el registro corporativo, publicará el evento \texttt{DocumentValidityChanged} y reemplazará al archivo sin cambiar las reglas.
+
+Límite del prototipo: el registro guarda \texttt{certified\_on}, pero el vencimiento a los 12 meses no está implementado; hoy se aplicaría editando el estado.

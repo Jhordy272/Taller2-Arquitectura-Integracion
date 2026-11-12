@@ -20,6 +20,7 @@ infraestructura. Los detalles de implementación de cada decisión están en la 
   ADR-05 & Recuperación & Búsqueda híbrida con filtro obligatorio de vigencia\\
   ADR-06 & Seguridad de la salida & Control en el servidor, sin delegar la defensa en el cliente\\
   ADR-07 & Regla de vigencia & Registro de vigencia con el área emisora como autoridad\\
+  ADR-08 & Contrato MCP & Revisión 2026-07-28: herramientas para buscar, resource para el registro y pistas de caché\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -142,7 +143,10 @@ Combinar búsqueda semántica y léxica, con el filtro de vigencia aplicado siem
 Se encuentran tanto los códigos exactos como las preguntas en lenguaje natural, y ningún cliente puede saltarse la vigencia.
 
 \adrcampo{Consecuencias}
-El historial no es consultable: una auditoría requeriría otra capacidad. El rechazo de preguntas en lenguaje natural depende de un umbral de similitud, que puede fallar en temas cercanos al corpus.
+El historial no es consultable: una auditoría requeriría otra capacidad. El rechazo de preguntas en lenguaje natural depende de un umbral de similitud, que falló en temas cercanos al corpus.
+
+\adrcampo{Revisión: guarda léxica}
+La evaluación mostró que el umbral deja pasar preguntas cercanas al corpus (sección~\ref{sec:mitigacion}). Por eso se agrega una segunda condición: un pasaje sustenta la respuesta solo si menciona al menos la mitad de los términos de contenido de la pregunta, contando su sección padre. Se diseñó con los casos conocidos y se midió una sola vez sobre casos congelados antes del diseño, en los que bajó las respuestas falsas de 4 de 10 a 1 de 10 sin perder respuestas válidas. Se descartaron por ahora un reranker local, que agrega un modelo y una dependencia sin medición previa, y la prioridad por clase de documento, que no ataca el fallo: 4 de los 5 falsos conocidos citaban manuales o normativa. El costo es que una respuesta válida puede rechazarse si la pregunta usa palabras distintas a las del documento; ya ocurre en un caso conocido. La variante sin guarda se conserva con \texttt{ANSWER\_GUARD=none}.
 \end{adr}
 
 % ----------------------------------------------------------------
@@ -211,5 +215,28 @@ Una certificación no es permanente: debe renovarse periódicamente y cuando cam
 Cada estado tiene una regla, una evidencia y un responsable identificado, y el servicio no cita un documento sin certificar.
 
 \adrcampo{Consecuencias}
-La vigencia depende de que las áreas respondan: sin respuesta, el documento no se cita. En el prototipo no hay áreas reales, así que los documentos sin certeza se marcan como vigentes en nombre de su área (sección~\ref{sec:marcacion}). Esto incluye los tres manuales, de modo que el prototipo podría citar el manual retirado que menciona el ACTA-CTO-2025-11, un riesgo que se acepta y se declara.
+La vigencia depende de que las áreas respondan: sin respuesta, el documento no se cita. En el prototipo no hay áreas reales, así que los documentos sin certeza se marcan como vigentes en nombre de su área, salvo MAN-OPE-004, que queda en duda para mostrar el tercer estado con el corpus real (sección~\ref{sec:marcacion}). Los otros dos manuales siguen asumidos como vigentes, de modo que el prototipo aún podría citar el manual retirado que menciona el ACTA-CTO-2025-11, un riesgo que se acepta y se declara. La sección~\ref{sec:operacion} define el plazo de certificación, la renovación y el escalamiento.
+\end{adr}
+
+% ----------------------------------------------------------------
+\begin{adr}{ADR-08}{Contrato MCP: revisión 2026-07-28, herramientas y resources}{Aceptada}
+\adrcampo{Contexto}
+La sesión 12 pide declarar en los listados del servidor cuánto tiempo puede reutilizarlos un cliente (\texttt{ttlMs}) y si puede compartirlos entre contextos de autorización (\texttt{cacheScope}), y distinguir qué se expone como herramienta y qué como resource. Había que verificar si el SDK usado (\texttt{mcp} 2.3) soporta la revisión 2026-07-28 antes de decidir. Se verificó en su código: implementa \texttt{server/discover}, las pistas de caché por método y un middleware de OpenTelemetry que lee la traza de \texttt{\_meta}.
+
+\adrcampo{Decisión}
+Adoptar la revisión 2026-07-28 con el soporte del SDK. La búsqueda y la obtención de fragmentos siguen siendo herramientas, porque las invoca el modelo; el registro de vigencia se publica como resource, porque lo carga la aplicación o el usuario. Los listados y el descubrimiento se declaran reutilizables por una hora y públicos; el registro, por no más que el intervalo de recarga del servidor (2 s). Las búsquedas no se declaran cacheables.
+
+\adrcampo{Alternativas descartadas}
+\begin{itemize}
+  \item Registro como herramienta (\texttt{list\_validity}). Dejaría al modelo decidir si consulta la vigencia, cuando es contexto que la aplicación debe poder mostrar siempre.
+  \item Un TTL igual a los 15 minutos de propagación. Un cliente podría mostrar un estado de hasta 15 minutos de antigüedad, además de la propagación: el TTL se suma a la latencia, no la reemplaza.
+  \item Alcance \texttt{private} en los listados. Nada en ellos depende de quién consulta; \texttt{private} solo impediría reutilizarlos entre clientes de la misma organización.
+  \item Implementar la revisión a mano sobre el protocolo anterior. El SDK ya la soporta; hacerlo a mano agregaría código sin valor.
+\end{itemize}
+
+\adrcampo{Mejoras}
+Un cliente sabe qué ofrece el servidor y por cuánto tiempo puede confiar en cada listado, y un analista puede ver por qué un documento no aparece sin pedírselo al modelo. Las solicitudes quedan listas para trazarse de extremo a extremo.
+
+\adrcampo{Consecuencias}
+Un cliente que solo habla revisiones anteriores no recibe las pistas de caché. Si el registro llega a depender de quién consulta, por ejemplo por permisos por documento, su alcance debe pasar a \texttt{private}. En el prototipo no hay exportador de OpenTelemetry: la traza existe, pero no se publica.
 \end{adr}
