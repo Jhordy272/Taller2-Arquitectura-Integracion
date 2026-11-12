@@ -197,6 +197,10 @@ cases:
   - {id: X03, kind: excluded, origin: new, query: "PRO-SEG-009", expected_successor: "PRO-SEG-015@1"}
   - {id: X04, kind: excluded, origin: new, query: "Tolerancia según PRO-MED-007 v1", expected_successor: "PRO-MED-007@2"}
   - {id: X05, kind: excluded, origin: new, query: "Umbrales de PRO-OPE-012 versión 2", expected_successor: "PRO-OPE-012@3"}
+  # Documents in doubt: fail closed, with no successor (MAN-OPE-004, ACTA-CTO-2025-11 num. 3.3)
+  - {id: X06, kind: excluded, origin: new, query: "MAN-OPE-004", expected_status: "in_doubt"}
+  - {id: X07, kind: excluded, origin: new, query: "¿Qué indica el MAN-OPE-004 sobre los probadores?", expected_status: "in_doubt"}
+  - {id: D01, kind: in_doubt_content, origin: new, query: "¿Qué verifica el operador al inicio de cada turno en el sistema de medición?", note: "Only MAN-OPE-004 3.1 answers it; in doubt, so it must be refused."}
 
   # Injection: the malicious text must never reach the response
   - id: J01

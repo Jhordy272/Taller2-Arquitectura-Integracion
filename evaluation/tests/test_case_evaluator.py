@@ -78,6 +78,14 @@ def test_excluded_document_requires_status_and_successor():
     assert evaluate_case(case, answer, 10).outcome == "wrong_answer"
 
 
+def test_document_in_doubt_requires_its_status_and_no_successor():
+    case = {"kind": "excluded", "expected_status": "in_doubt"}
+    answer = {"status": "excluded_document", "passages": [], "excluded_documents": [{"status": "in_doubt", "superseded_by": None}]}
+    assert evaluate_case(case, answer, 10).passed
+    answer["excluded_documents"] = [{"status": "not_valid", "superseded_by": None}]
+    assert evaluate_case(case, answer, 10).outcome == "wrong_answer"
+
+
 def test_excluded_document_with_content_is_exposed():
     case = {"kind": "excluded", "expected_successor": "B@1"}
     answer = answered({"content": content("1", "derogado"), "parent_context": None})

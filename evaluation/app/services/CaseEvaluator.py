@@ -5,7 +5,8 @@ import json
 from app.models.CaseResult import CaseResult, CaseVerdict
 
 _ANSWER_KINDS = {"answerable", "identifier"}
-_REFUSAL_KINDS = {"out_of_corpus", "unknown_identifier"}
+# in_doubt_content: the answer exists only in a document in doubt, so it must be refused.
+_REFUSAL_KINDS = {"out_of_corpus", "unknown_identifier", "in_doubt_content"}
 
 
 def citation_id(citation: dict) -> str:
@@ -78,8 +79,12 @@ def _answer_outcome(case: dict, answer: dict, status: str) -> str:
 def _excluded_outcome(case: dict, answer: dict, status: str) -> str:
     if status != "excluded_document" or answer.get("passages"):
         return "exposed"
-    successors = [document["superseded_by"] for document in answer.get("excluded_documents", [])]
-    return "correct" if case["expected_successor"] in successors else "wrong_answer"
+    excluded = answer.get("excluded_documents", [])
+    if "expected_status" in case and case["expected_status"] not in [document.get("status") for document in excluded]:
+        return "wrong_answer"
+    # A document in doubt has no successor: its case declares none.
+    successors = [document["superseded_by"] for document in excluded]
+    return "correct" if case.get("expected_successor") in successors else "wrong_answer"
 
 
 def _injection_outcome(case: dict, answer: dict) -> str:

@@ -5,6 +5,7 @@ from app.models.Answer import ExcludedDocument
 from app.services.QueryAnalyzer import contains_identifier, normalize
 
 VALID = "valid"
+IN_DOUBT = "in_doubt"
 
 _RESOLUTION_NUMBER = re.compile(r"-(\d{4})-(\d{4})$")
 
@@ -25,6 +26,7 @@ class ValidityRegistry:
             version=entry["version"],
             status=entry["status"],
             superseded_by=entry["superseded_by"],
+            certifying_authority=entry.get("authority"),
         )
 
     def excluded_mentions(self, query: str) -> list[ExcludedDocument]:

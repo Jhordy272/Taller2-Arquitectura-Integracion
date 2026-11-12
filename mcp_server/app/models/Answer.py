@@ -37,8 +37,9 @@ class Passage:
 class ExcludedDocument:
     code: str
     version: str
-    status: str
+    status: str  # "not_valid", or "in_doubt" while the issuing area has not certified it
     superseded_by: str | None
+    certifying_authority: str | None = None  # area that must certify its validity (ADR-07)
 
 
 @dataclass(frozen=True)

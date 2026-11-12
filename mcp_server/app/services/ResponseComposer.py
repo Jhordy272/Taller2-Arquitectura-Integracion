@@ -5,12 +5,16 @@ from app.models.RetrievedFragment import RetrievedFragment, SearchOutcome
 from app.repositories.QdrantSearchRepository import QdrantSearchRepository
 from app.services.HybridSearchService import HybridSearchService
 from app.services.QueryAnalyzer import contains_identifier, extract_identifiers
-from app.services.ValidityRegistry import VALID, ValidityRegistry
+from app.services.ValidityRegistry import IN_DOUBT, VALID, ValidityRegistry
 
 MESSAGE_ANSWERED = "Pasajes literales del corpus, con su cita. No se generó texto adicional."
 MESSAGE_NO_SUPPORT = "La respuesta no está en el corpus vigente."
 MESSAGE_UNKNOWN_IDENTIFIER = "El identificador consultado no aparece en el corpus vigente."
 MESSAGE_EXCLUDED = "El documento consultado no está vigente: no se muestra su contenido."
+MESSAGE_IN_DOUBT = (
+    "La vigencia del documento consultado está en duda: su área emisora no la ha certificado. "
+    "No se muestra su contenido."
+)
 MESSAGE_FRAGMENT_NOT_FOUND = "El fragmento solicitado no existe en el corpus vigente."
 ALERT_WITHHELD = "Contenido retenido: contiene instrucciones dirigidas a sistemas automáticos."
 
@@ -121,4 +125,7 @@ class ResponseComposer:
         return Content(citation=citation, text=fragment.text, withheld=False, alert=None)
 
     def _excluded_answer(self, query: str, excluded: list[ExcludedDocument]) -> Answer:
-        return Answer(status="excluded_document", query=query, message=MESSAGE_EXCLUDED, excluded_documents=excluded)
+        """A document in doubt is not known to be derogated, so the message must not say so."""
+        in_doubt = all(document.status == IN_DOUBT for document in excluded)
+        message = MESSAGE_IN_DOUBT if in_doubt else MESSAGE_EXCLUDED
+        return Answer(status="excluded_document", query=query, message=message, excluded_documents=excluded)

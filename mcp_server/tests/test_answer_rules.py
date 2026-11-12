@@ -3,7 +3,7 @@ import pytest
 
 from app.models.RetrievedFragment import RetrievedFragment, SearchOutcome
 from app.services.QueryAnalyzer import contains_identifier, extract_identifiers
-from app.services.ResponseComposer import ALERT_WITHHELD, ResponseComposer
+from app.services.ResponseComposer import ALERT_WITHHELD, MESSAGE_EXCLUDED, MESSAGE_IN_DOUBT, ResponseComposer
 from app.services.ValidityRegistry import ValidityRegistry
 
 THRESHOLD = 0.83
@@ -13,7 +13,7 @@ REGISTRY = [
     {"code": "PRO-MED-007", "version": "2", "status": "valid", "superseded_by": None},
     {"code": "PRO-SEG-009", "version": "1", "status": "not_valid", "superseded_by": "PRO-SEG-015@1"},
     {"code": "RES-CREG-0112-2021", "version": "unversioned", "status": "not_valid", "superseded_by": "RES-CREG-0043-2024@unversioned"},
-    {"code": "MAN-X", "version": "1", "status": "in_doubt", "superseded_by": None},
+    {"code": "MAN-X", "version": "1", "status": "in_doubt", "superseded_by": None, "authority": "Gerencia X"},
 ]
 
 
@@ -193,6 +193,26 @@ def test_named_excluded_document_is_reported_without_searching(query, code, succ
     assert answer.excluded_documents[0].code == code
     assert answer.excluded_documents[0].superseded_by == successor
     assert instance._search_service.calls == 0
+
+
+def test_document_in_doubt_is_reported_as_uncertified_not_derogated():
+    answer = composer().answer("¿Qué dice MAN-X?")
+    assert answer.status == "excluded_document"
+    assert answer.message == MESSAGE_IN_DOUBT
+    assert answer.excluded_documents[0].status == "in_doubt"
+    assert answer.excluded_documents[0].certifying_authority == "Gerencia X"
+
+
+def test_derogated_document_keeps_the_not_valid_message():
+    answer = composer().answer("PRO-SEG-009")
+    assert answer.message == MESSAGE_EXCLUDED
+
+
+def test_fetching_a_fragment_in_doubt_fails_closed():
+    answer = composer(stored=[fragment("MAN-X@1#1")]).get_fragment("MAN-X", "1", "1")
+    assert answer.status == "excluded_document"
+    assert answer.passages == []
+    assert answer.message == MESSAGE_IN_DOUBT
 
 
 @pytest.mark.parametrize("query", ["tolerancia en PRO-MED-007", "tolerancia en PRO-MED-007 v2"])
