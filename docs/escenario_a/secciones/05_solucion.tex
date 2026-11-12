@@ -197,13 +197,13 @@ La Tabla~\ref{tab:instanciacion} ubica cada decisión en el elemento del reposit
   \multicolumn{3}{l}{\small\textit{Tabla~\ref{tab:instanciacion} -- continuación}}\\[2pt]
   \tblhead ADR & \color{white}\bfseries Elemento & \color{white}\bfseries Responsabilidad\\
   \endhead\bottomrule\endlastfoot
-  ADR-01 & \texttt{ingestion/.../QdrantRepository}, \texttt{mcp\_server/.../QdrantSearchRepository} & Escribir y consultar la colección, con alias para activarla\\
+  ADR-01 & \texttt{QdrantRepository} (ingesta), \texttt{Qdrant\-Search\-Repository} (servidor) & Escribir y consultar la colección, con alias para activarla\\
   ADR-02 & \texttt{SectionParser}, \texttt{Partitioner} & Reconocer la estructura y producir fragmentos citables\\
   ADR-03 & \texttt{ResponseComposer} & Componer pasajes literales con cita, o rechazar\\
-  ADR-04 & \texttt{EmbeddingRepository}, \texttt{QueryEmbeddingRepository}, \texttt{ensure\_compatible} & Fijar modelo y revisión, y negarse a arrancar con una colección incompatible\\
+  ADR-04 & \texttt{Embedding\-Repository}, \texttt{Query\-Embedding\-Repository}, \texttt{ensure\_compatible} & Fijar modelo y revisión, y negarse a arrancar con una colección incompatible\\
   ADR-05 & \texttt{HybridSearchService}, \texttt{LexicalTokenizer}, \texttt{LexicalGuard} & Búsqueda híbrida filtrada, rama léxica y guarda de soporte\\
   ADR-06 & \texttt{InjectionDetector}, \texttt{ResponseComposer.\_content} & Marcar en la ingesta y retener en la salida\\
-  ADR-07 & \texttt{data/validity\_registry.yaml}, \texttt{ValidityRegistry}, \texttt{ReloadingValidityRegistry} & Fuente de verdad de la vigencia, leída en vivo\\
+  ADR-07 & \texttt{validity\_registry.yaml}, \texttt{Validity\-Registry}, \texttt{Reloading\-Validity\-Registry} & Fuente de verdad de la vigencia, leída en vivo\\
   ADR-08 & \texttt{DocumentTools}, \texttt{ValidityResources}, \texttt{main.cache\_hints} & Contrato MCP: herramientas, resources y pistas de caché\\
 \end{longtable}
 

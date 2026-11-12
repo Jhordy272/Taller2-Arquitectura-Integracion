@@ -131,8 +131,8 @@ El registro de vigencia se publica como \emph{resource}, y no como herramienta, 
 \caption{Resources del servidor}\label{tab:mcp-resources}
 \begin{tabular}{L{4.6cm} L{2.4cm} L{8.6cm}}
   \tblhead URI & \color{white}\bfseries Tipo & \color{white}\bfseries Contenido\\
-  \texttt{petroandes://validity/registry} & Fijo, JSON & Todos los documentos: código, versión, clase, estado, estado de la certificación, área que certifica y sucesor\\
-  \texttt{petroandes://validity/\{code\}} & Plantilla, JSON & Las versiones de un documento. Un código que no está en el registro devuelve un error\\
+  \texttt{petroandes://\allowbreak validity/\allowbreak registry} & Fijo, JSON & Todos los documentos: código, versión, clase, estado, estado de la certificación, área que certifica y sucesor\\
+  \texttt{petroandes://\allowbreak validity/\allowbreak \{code\}} & Plantilla, JSON & Las versiones de un documento. Un código que no está en el registro devuelve un error\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -174,7 +174,7 @@ El servidor se verificó con MCP Inspector 2.13, conectado por \texttt{stdio}. L
 \end{tabular}
 \end{table}
 
-Las capacidades añadidas tras la primera verificación se comprobaron con un cliente MCP conectado por \texttt{stdio} al servidor real, y quedan cubiertas por pruebas automáticas con un cliente en proceso (\texttt{tests/test\_mcp\_resources.py}):
+Las capacidades añadidas tras la primera verificación se comprobaron con un cliente MCP conectado por \texttt{stdio} al servidor real, y quedan cubiertas por las pruebas automáticas de \texttt{mcp\_server}, que usan un cliente en proceso:
 
 \begin{table}[H]
 \centering
@@ -184,7 +184,7 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
   \texttt{server/discover} & -- & Revisión 2026-07-28, con herramientas y resources\\
   \texttt{tools/list} & -- & Dos herramientas; \texttt{ttlMs} 3.600.000, \texttt{cacheScope} \texttt{public}\\
   \texttt{resources/list} & -- & \texttt{petroandes://validity/registry}; \texttt{ttlMs} 3.600.000\\
-  \texttt{resources/read} & \texttt{petroandes://validity/MAN-OPE-004} & Estado \texttt{in\_doubt}, certificación \texttt{pending}; \texttt{ttlMs} 2.000\\
+  \texttt{resources/read} & \texttt{petroandes://\allowbreak validity/\allowbreak MAN-OPE-004} & Estado \texttt{in\_doubt}, certificación \texttt{pending}; \texttt{ttlMs} 2.000\\
   \texttt{search\_documents} & MAN-OPE-004 & \texttt{excluded\_document}, \texttt{in\_doubt}, área Gerencia de Medición, sin contenido\\
   \bottomrule
 \end{tabular}
@@ -208,7 +208,7 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
 
 La Tabla~\ref{tab:catalogo} reúne los contratos del servicio: los del prototipo y los dos eventos de producción, que siguen en diseño.
 
-\begin{longtable}{L{3.4cm} L{2.4cm} L{2.6cm} L{2.6cm} L{4.6cm}}
+\begin{longtable}{L{3.2cm} L{2.3cm} L{2.4cm} L{2.4cm} L{4.4cm}}
   \caption{Catálogo de contratos}\label{tab:catalogo}\\
   \tblhead Contrato & \color{white}\bfseries Productor & \color{white}\bfseries Consumidor & \color{white}\bfseries Mecanismo & \color{white}\bfseries Esquema\\
   \endfirsthead
@@ -216,10 +216,10 @@ La Tabla~\ref{tab:catalogo} reúne los contratos del servicio: los del prototipo
   \tblhead Contrato & \color{white}\bfseries Productor & \color{white}\bfseries Consumidor & \color{white}\bfseries Mecanismo & \color{white}\bfseries Esquema\\
   \endhead\bottomrule\endlastfoot
   \texttt{search\_documents}, \texttt{get\_fragment} & \texttt{mcp\_server} & Cliente MCP, \texttt{evaluation} & MCP, \texttt{tools/call} & JSON Schema de entrada y salida, generado del código\\
-  \texttt{petroandes://validity/...} & \texttt{mcp\_server} & Aplicación o usuario & MCP, \texttt{resources/read} & JSON del registro (sección anterior)\\
+  \texttt{petroandes://\allowbreak validity/...} & \texttt{mcp\_server} & Aplicación o usuario & MCP, \texttt{resources/\allowbreak read} & JSON del registro (sección anterior)\\
   Registro de vigencia & Gerencia de Cumplimiento y áreas emisoras & \texttt{ingestion}, \texttt{mcp\_server} & Archivo YAML versionado & \texttt{schema\_version} 1; entradas con código, versión, estado, regla, evidencia y certificación\\
   Colección del índice & \texttt{ingestion} & \texttt{mcp\_server} & Qdrant, alias \texttt{corpus\_active} & Payload del fragmento (Tabla~\ref{tab:metadatos}) y metadatos de versiones de la colección\\
-  \texttt{DocumentValidityChanged} (diseño) & Registro corporativo & \texttt{mcp\_server}, \texttt{ingestion} & CloudEvents sobre el backbone del Taller 1 & Listado~\ref{lst:evento}\\
+  \texttt{Document\-Validity\-Changed} (diseño) & Registro corporativo & \texttt{mcp\_server}, \texttt{ingestion} & CloudEvents sobre el backbone del Taller 1 & Listado~\ref{lst:evento}\\
   \texttt{DocumentPublished} (diseño) & Sistema documental & \texttt{ingestion} & CloudEvents sobre el backbone del Taller 1 & Código, versión, ubicación y hash del PDF\\
 \end{longtable}
 

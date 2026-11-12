@@ -20,7 +20,7 @@ La Tabla~\ref{tab:eip} nombra cada etapa implementada con su patrón de Hohpe \&
   Vigencia y vectores & Copia del registro, \texttt{Embedding\-Repository}, \texttt{Lexical\-Tokenizer} & Content Enricher & Agrega al fragmento datos de otras fuentes\\
   Marca de inyección & \texttt{InjectionDetector} & Content Enricher & Agrega una marca, sin decidir la entrega\\
   Carga idempotente & \texttt{QdrantRepository}, identificador determinista & Idempotent Receiver & Reingerir no duplica\\
-  Cambio de vigencia & \texttt{ReloadingValidityRegistry} & Polling Consumer & El servidor consulta si el registro cambió, como máximo cada 2 s; en producción, Event-Driven Consumer del evento de vigencia\\
+  Cambio de vigencia & \texttt{Reloading\-Validity\-Registry} & Polling Consumer & El servidor consulta si el registro cambió, como máximo cada 2 s; en producción, Event-Driven Consumer del evento de vigencia\\
   Alineación del índice & \texttt{--sync-validity} & Event-Driven Consumer (diseño); hoy, ejecución manual & Actualiza el estado guardado en Qdrant\\
   \multicolumn{4}{l}{\textbf{Consulta}}\\
   Herramientas MCP & \texttt{DocumentTools} & Service Activator, Request-Reply & El protocolo invoca el servicio y espera su respuesta\\
