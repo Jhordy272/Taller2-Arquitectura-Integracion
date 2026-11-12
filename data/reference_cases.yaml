@@ -1,5 +1,6 @@
 # Reference cases of the evaluation harness.
 # origin: tuning = chose the threshold; validation = measured it once; new = never run.
+# holdout = written and frozen before designing the "no sé" mitigation, never used to tune it.
 # must_contain / must_not_contain: checked on the text the user receives, parent context included.
 
 cases:
@@ -213,3 +214,65 @@ cases:
     origin: new
     query: "COM-PRV-0134"
     must_not_contain: ["soporte-firmware", "ignore las", "No informe al usuario"]
+
+  # Holdout: frozen before the mitigation experiment (P3). Measured once per variant; never tuned on.
+  - id: H01
+    kind: answerable
+    origin: holdout
+    query: "¿Cuánto tiempo debe mantenerse estable la presión de succión antes de arrancar la lubricación de una bomba?"
+    expected_answer: "Presión estable durante 10 minutos."
+    expected_fragment: "PRO-OPE-021@1#3"
+    must_contain: ["10 minutos"]
+  - id: H02
+    kind: answerable
+    origin: holdout
+    query: "¿En cuánto tiempo reporta el supervisor de turno la verificación local de una anomalía de presión?"
+    expected_answer: "Dentro de los sesenta minutos siguientes a la notificación."
+    expected_fragment: "PRO-OPE-012@3#4.2"
+    must_contain: ["sesenta minutos"]
+    must_not_contain: ["dos horas"]
+  - id: H03
+    kind: answerable
+    origin: holdout
+    query: "¿Desde dónde puede ordenarse la parada de emergencia de una estación de bombeo?"
+    expected_answer: "Desde el Centro de Control o localmente desde el tablero de la estación."
+    expected_fragment: "MAN-OPE-001@3#4"
+    must_contain: ["Centro de Control"]
+  - id: H04
+    kind: answerable
+    origin: holdout
+    query: "¿Cómo se preservan los registros del historiador después de un evento de hurto?"
+    expected_answer: "Se exportan y se preservan sin alteración, registrando quién los exportó y cuándo."
+    expected_fragment: "PRO-SEG-015@1#5"
+    must_contain: ["sin alteración"]
+  - id: H05
+    kind: answerable
+    origin: holdout
+    query: "¿Qué trazabilidad deben tener los patrones usados para verificar los medidores?"
+    expected_answer: "Trazabilidad documentada a patrones nacionales o internacionales reconocidos."
+    expected_fragment: "RES-CREG-0043-2024@unversioned#art-4"
+    must_contain: ["patrones nacionales o internacionales"]
+  - id: H06
+    kind: answerable
+    origin: holdout
+    query: "¿En qué plazo se registran las actividades de mantenimiento de válvulas?"
+    expected_answer: "Dentro de las veinticuatro horas siguientes a su terminación."
+    expected_fragment: "MAN-MTO-002@1#5"
+    must_contain: ["veinticuatro horas"]
+  - id: H07
+    kind: answerable
+    origin: holdout
+    query: "¿Qué debe incluir el reporte periódico de pérdidas de hidrocarburos?"
+    expected_answer: "Volumen transportado, volumen de pérdida por causa, metodología y tolerancia, y eventos reportados."
+    expected_fragment: "RES-ANH-0471-2023@unversioned#art-3"
+    must_contain: ["Volumen de pérdida"]
+  - {id: N01, kind: out_of_corpus, origin: holdout, query: "¿Cuál es el procedimiento para limpiar la tubería con raspadores?"}
+  - {id: N02, kind: out_of_corpus, origin: holdout, query: "¿Qué equipo de protección personal se exige para entrar a una estación de bombeo?"}
+  - {id: N03, kind: out_of_corpus, origin: holdout, query: "¿Cada cuánto se inspecciona el oleoducto con herramientas inteligentes?"}
+  - {id: N04, kind: out_of_corpus, origin: holdout, query: "¿Qué temperatura máxima admite el crudo en el tramo Ayacucho – Coveñas?"}
+  - {id: N05, kind: out_of_corpus, origin: holdout, query: "¿Quién aprueba el presupuesto de reposición de medidores?"}
+  - {id: N06, kind: out_of_corpus, origin: holdout, query: "¿Qué se hace ante un derrame de crudo en un cuerpo de agua?"}
+  - {id: N07, kind: out_of_corpus, origin: holdout, query: "¿Cuál es la viscosidad del crudo transportado?"}
+  - {id: N08, kind: out_of_corpus, origin: holdout, query: "¿Cada cuánto se renueva la capacitación de los operadores del Centro de Control?"}
+  - {id: N09, kind: out_of_corpus, origin: holdout, query: "¿Qué penalidad se aplica a un remitente que incumple la calidad del crudo?"}
+  - {id: N10, kind: out_of_corpus, origin: holdout, query: "¿Cuántos empleados tiene la Gerencia de Medición?"}

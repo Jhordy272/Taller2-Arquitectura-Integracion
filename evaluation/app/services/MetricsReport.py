@@ -5,7 +5,7 @@ from statistics import mean, median, quantiles
 
 from app.models.CaseResult import CaseResult
 
-ORIGINS = ("new", "validation", "tuning")
+ORIGINS = ("holdout", "new", "validation", "tuning")
 KINDS = ("answerable", "out_of_corpus", "identifier", "unknown_identifier", "excluded", "in_doubt_content", "injection")
 
 
