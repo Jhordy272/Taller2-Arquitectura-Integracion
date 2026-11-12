@@ -1,0 +1,32 @@
+% ================================================================
+%  Conclusiones, referencias y uso de IA
+% ================================================================
+\section{Conclusiones}
+
+\begin{itemize}
+  \item El gobierno se resuelve con reglas, y las reglas no fallaron. Ningún documento derogado o en duda se expuso en 7 casos, ni el contenido malicioso en 2, y un cambio de vigencia llega a las respuestas en 2,05 s como máximo, sin reiniciar el servidor. La vigencia es una decisión de las áreas emisoras, y el prototipo la trata como dato de entrada, no como algo que se infiere del texto.
+  \item La similitud es donde está el riesgo. Todos los fallos medidos dependen de ella: respuestas falsas fuera del corpus (1 de 10 en casos no vistos) y citas verdaderas que no responden la pregunta (3 de 29). La guarda léxica redujo las primeras sin costo en los casos no vistos, pero no cumple la meta de 5~\% y no resuelve las segundas.
+  \item La composición determinista acota el daño, no lo elimina. No inventa texto ni altera valores, pero puede mostrar un pasaje equivocado con una cita correcta. Por eso el servicio debe usarse como apoyo de búsqueda con la cita como elemento central.
+  \item Las métricas del juez son orientativas. El anclaje distingue con ruido y la relevancia de \texttt{laya} no es confiable en este corpus; las conclusiones se apoyan en las métricas deterministas.
+  \item Medir sobre casos no vistos cambia la lectura. En la primera medición, los casos usados para calibrar daban una desviación de 4~\% y los casos nuevos, de 22~\%. Por eso la mitigación se midió sobre casos congelados antes de diseñarla.
+  \item Límites del prototipo: un corpus de 19 documentos, casos escritos por el mismo grupo, una sola réplica, certificaciones simuladas y los 15 minutos de propagación de producción sin medir de punta a punta, porque el evento corporativo no existe todavía.
+\end{itemize}
+
+\section{Referencias}
+
+\begin{itemize}
+  \item Hohpe, G. y Woolf, B. (2003). \emph{Enterprise Integration Patterns}. Addison-Wesley.
+  \item Model Context Protocol. Especificación, revisión 2026-07-28. \texttt{modelcontextprotocol.io}.
+  \item CNCF. CloudEvents, especificación 1.0. \texttt{cloudevents.io}.
+  \item IETF. OAuth 2.1 (borrador) y RFC 9728, \emph{OAuth 2.0 Protected Resource Metadata}.
+  \item ISA/IEC 62443 y el modelo de referencia Purdue para la segmentación de redes industriales.
+  \item Cormack, G., Clarke, C. y Büttcher, S. (2009). Reciprocal Rank Fusion outperforms Condorcet and individual rank learning methods. \emph{SIGIR}.
+  \item Wang, L. et al. (2024). Multilingual E5 Text Embeddings: A Technical Report. arXiv:2402.05672.
+  \item Qdrant. Documentación de la API de consultas híbridas, versión 1.20.
+  \item NandhaKishorM. \texttt{laya}, modelo de decisiones tipadas, licencia Apache-2.0.
+  \item PetroAndes (sintético). Corpus documental del Taller 2, 19 documentos.
+\end{itemize}
+
+\section{Nota sobre el uso de inteligencia artificial}
+
+El grupo usó un asistente de programación basado en un modelo de lenguaje (Claude Code) para apoyar la revisión del código, la redacción de pruebas, la implementación de las correcciones posteriores a la retroalimentación y la redacción de este documento. Las decisiones de arquitectura, la regla de vigencia y la selección de los casos de referencia son del grupo, que revisó el código y los textos antes de entregarlos. Los resultados reportados provienen de ejecuciones reales del arnés, guardadas en \texttt{data/evidence/}. Por separado, Claude se usó como cliente MCP en la prueba de la sección~\ref{sec:contrato-mcp}, lo que se admitió solo porque el corpus es sintético (ADR-06).

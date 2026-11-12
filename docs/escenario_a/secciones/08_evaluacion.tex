@@ -1,28 +1,29 @@
 % ================================================================
 %  Evaluación
 % ================================================================
-\section{Evaluación}
+\section{Evaluación}\label{sec:evaluacion}
 
 \subsection{Casos de referencia}
 
-El conjunto está en \texttt{data/reference\_cases.yaml} y lo escribió el grupo. Tiene 46 casos, cada uno con el comportamiento esperado. Las preguntas con respuesta declaran además la respuesta, el fragmento que la contiene y el texto que debe aparecer o no en lo que recibe el usuario, incluida la sección padre.
+El conjunto está en \texttt{data/reference\_cases.yaml} y lo escribió el grupo. Tiene 66 casos, cada uno con el comportamiento esperado. Las preguntas con respuesta declaran además la respuesta, el fragmento que la contiene y el texto que debe aparecer o no en lo que recibe el usuario, incluida la sección padre.
 
 \begin{table}[H]
 \centering
 \caption{Casos de referencia por tipo}\label{tab:casos}
 \begin{tabular}{L{4.2cm} L{1.4cm} L{10.0cm}}
   \tblhead Tipo & \color{white}\bfseries Casos & \color{white}\bfseries Comportamiento esperado\\
-  Con respuesta & 22 & Responde con el valor correcto, sin valores derogados\\
-  Fuera del corpus & 9 & Rechaza la consulta\\
+  Con respuesta & 29 & Responde con el valor correcto, sin valores derogados\\
+  Fuera del corpus & 19 & Rechaza la consulta\\
   Identificador existente & 5 & Responde con el fragmento que lo contiene\\
   Identificador inexistente & 3 & Rechaza la consulta\\
-  Documento excluido & 5 & Informa su estado y su sucesor, sin contenido\\
+  Documento excluido & 7 & Informa su estado y su sucesor, o el área que debe certificarlo si está en duda, sin contenido\\
+  Contenido en duda & 1 & Rechaza la pregunta que solo responde un documento en duda\\
   Inyección & 2 & El texto malicioso nunca aparece en la respuesta\\
   \bottomrule
 \end{tabular}
 \end{table}
 
-Cada caso declara su origen, porque no todos son igual de independientes: 23 se usaron para elegir el umbral, 5 lo midieron una vez y 18 son nuevos. Solo los 18 nuevos miden sobre casos no vistos, por lo que los resultados deben leerse por origen. El conjunto incluye a propósito los fallos ya conocidos de la sección~\ref{sec:citas-erradas} y de la calibración del umbral: si se excluyeran, las métricas saldrían mejor de lo que el sistema es.
+Cada caso declara su origen, porque no todos son igual de independientes: 23 se usaron para elegir el umbral, 5 lo midieron una vez, 21 son nuevos y 17 son \emph{holdout}. Los nuevos se escribieron sin usarse para ajustar nada, pero sus resultados ya se conocían cuando se diseñó la guarda léxica de la sección~\ref{sec:mitigacion}. Los holdout se escribieron y se congelaron en el repositorio antes de diseñarla, y se midieron una sola vez por variante: son los únicos que miden sobre casos no vistos por ninguna decisión. El conjunto incluye a propósito los fallos ya conocidos: si se excluyeran, las métricas saldrían mejor de lo que el sistema es.
 
 \subsection{Arnés y métricas}
 
@@ -46,15 +47,18 @@ El componente \texttt{evaluation/} ejecuta los casos contra el servidor por MCP,
 
 \subsection{Resultados}
 
+Los resultados corresponden al servicio final: MAN-OPE-004 en duda y la guarda léxica activa.
+
 \begin{table}[H]
 \centering
 \caption{Resultados por origen de los casos}\label{tab:resultados-origen}
 \begin{tabular}{L{4.2cm} L{1.2cm} L{1.8cm} L{1.1cm} L{1.1cm} L{1.4cm} L{1.4cm} L{1.6cm}}
   \tblhead Origen & \color{white}\bfseries Casos & \color{white}\bfseries Desviación & \color{white}\bfseries Hit & \color{white}\bfseries MRR & \color{white}\bfseries Anclaje & \color{white}\bfseries Control & \color{white}\bfseries Relevancia\\
-  Nuevos (más independiente) & 18 & 22~\% & 0,86 & 0,86 & 0,69 & 0,24 & 0,14\\
-  Validación del umbral & 5 & 40~\% & 1,00 & 0,83 & 0,98 & 0,61 & 0,33\\
-  Elección del umbral & 23 & 4~\% & 0,94 & 0,84 & 0,86 & 0,26 & 0,46\\
-  Total & 46 & 15~\% & 0,93 & 0,85 & 0,83 & 0,29 & 0,37\\
+  Holdout (no vistos) & 17 & 6~\% & 1,00 & 0,89 & 0,95 & 0,13 & 0,18\\
+  Nuevos & 21 & 14~\% & 0,86 & 0,86 & 0,76 & 0,23 & 0,14\\
+  Validación del umbral & 5 & 0~\% & 1,00 & 0,83 & 0,99 & 0,04 & 0,56\\
+  Elección del umbral & 23 & 9~\% & 0,88 & 0,81 & 0,79 & 0,13 & 0,62\\
+  Total & 66 & 9~\% & 0,91 & 0,84 & 0,84 & 0,14 & 0,43\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -64,57 +68,91 @@ El componente \texttt{evaluation/} ejecuta los casos contra el servidor por MCP,
 \caption{Resultados por tipo de caso}\label{tab:resultados-tipo}
 \begin{tabular}{L{4.6cm} L{2.0cm} L{2.0cm} L{6.4cm}}
   \tblhead Tipo & \color{white}\bfseries Fallan & \color{white}\bfseries Desviación & \color{white}\bfseries Tipo de control\\
-  Documento excluido & 0/5 & 0~\% & Regla: registro de vigencia\\
+  Documento excluido & 0/7 & 0~\% & Regla: registro de vigencia\\
   Inyección & 0/2 & 0~\% & Regla: retención en el servidor\\
   Identificador existente & 0/5 & 0~\% & Regla: coincidencia exacta\\
   Identificador inexistente & 0/3 & 0~\% & Regla: coincidencia exacta\\
-  Con respuesta & 2/22 & 9~\% & Similitud\\
-  Fuera del corpus & 5/9 & 56~\% & Similitud\\
+  Con respuesta & 3/29 & 10~\% & Similitud y guarda léxica\\
+  Fuera del corpus & 2/19 & 11~\% & Similitud y guarda léxica\\
+  Contenido en duda & 1/1 & 100~\% & Similitud y guarda léxica\\
   \bottomrule
 \end{tabular}
 \end{table}
 
-En los casos, la latencia tuvo una mediana de 32 ms, un percentil 95 de 76 ms y un máximo de 137 ms, muy por debajo del compromiso de 5 s. No incluye el arranque del servidor, de unos 13 segundos. Solo se mide un cliente a la vez y sobre un corpus pequeño.
+En los casos, la latencia tuvo una mediana de 27 ms y un percentil 95 de 76 ms. El máximo fue de 1,4 s, en la primera llamada de la ejecución; el siguiente valor más alto fue de 91 ms. Todos quedan por debajo del compromiso de 5 s. No incluye el arranque del servidor, de unos 13 segundos. Solo se mide un cliente a la vez y sobre un corpus pequeño.
 
 \subsection{Lectura de los resultados}\label{sec:lectura}
 
-Los controles por regla no fallaron; la similitud sí. Los 15 casos que dependen de reglas se comportaron como se esperaba, incluidos los documentos derogados y la inyección. Los siete fallos están en los casos que dependen de la similitud. El dato no prueba que las reglas sean infalibles, porque son pocos casos, pero respalda la decisión de resolver el gobierno con reglas y no con un modelo.
+Los controles por regla no fallaron; la similitud sí. Los 17 casos que dependen de reglas se comportaron como se esperaba, incluidos los documentos derogados, el documento en duda y la inyección. Los seis fallos están en los casos que dependen de la similitud. El dato no prueba que las reglas sean infalibles, porque son pocos casos, pero respalda la decisión de resolver el gobierno con reglas y no con un modelo.
 
-El servicio no sabe decir ``no sé'' en temas cercanos. Rechaza una pregunta sobre el crudo Brent, pero responde con citas a cinco de nueve preguntas fuera del corpus, entre ellas tres de las cuatro nuevas: el plan de contingencia por incendio, las sanciones del regulador y el presupuesto de mantenimiento. Comparten vocabulario con el corpus. Es el fallo más serio: el umbral separó mejor en la calibración (2/12 falsas), cuyas preguntas eran en general más alejadas, y este conjunto incluye a propósito preguntas cercanas. Por eso, ninguna de las dos cifras debe citarse sola.
+El ``no sé'' mejoró, pero no cumple. Antes de la guarda, el servicio respondía con citas a cinco de nueve preguntas fuera del corpus. Con la guarda falla en dos de 19, y en uno de los diez holdout: la renovación de la capacitación de los operadores, que comparte casi todos sus términos con el corpus. La sección~\ref{sec:mitigacion} detalla el experimento.
 
-Los casos ya usados salen mejor. La desviación es de 4~\% en los casos que eligieron el umbral y de 22~\% en los nuevos. Reportar solo el total (15~\%) sería engañoso.
+Un documento en duda no basta para que se responda ``no sé''. La pregunta D01 solo tiene respuesta en MAN-OPE-004. El servicio no muestra ese manual, pero sí devuelve un artículo de RES-CREG-0043-2024 sobre la verificación de medidores, que no responde la pregunta. La exclusión funciona; lo que falla es el rechazo, igual que en las preguntas fuera del corpus.
 
-El anclaje distingue, con ruido. Los casos correctos promedian 0,90, y los dos incorrectos, 0,01. El control usa pasajes de otro documento que no contienen la respuesta esperada, y debe puntuar bajo: promedia 0,29 frente a 0,83 del anclaje real, y queda por debajo en 23 de 27 casos. El juez distingue, pero con errores en ambos sentidos: da más de 0,5 a siete controles, cuando sus pasajes no contienen el texto esperado (A05 y A07: 1,00), y menos de 0,5 a dos respuestas correctas (A21: 0,08; I01: 0,17). Este valor es orientativo. Una primera versión del control tomaba el caso vecino, a menudo del mismo documento y con la respuesta en sus pasajes; se corrigió porque invalidaba esa comparación.
+Los casos ya usados ya no salen mejor. La desviación es de 9~\% en los casos que eligieron el umbral, de 14~\% en los nuevos y de 6~\% en los holdout. La guarda costó un fallo en los casos de calibración (A17, sección~\ref{sec:mitigacion}), y los holdout, aunque son los más independientes, son solo 17.
 
-La reproducibilidad se midió y se corrigió. Al repetir una primera evaluación con el mismo índice, ningún caso cambió de resultado, pero sí el orden de algunos pasajes, lo que contradecía el ADR-03. Se observaban fragmentos con el mismo puntaje de RRF, y el motor no garantiza un orden entre ellos. Se agregó un desempate por identificador antes de cortar los resultados. Después, dos ejecuciones con arranques separados del servidor dieron pasajes y orden idénticos en los 46 casos (\texttt{evaluation\_reproducibility.csv}). Son dos ejecuciones sobre un corpus fijo, no una prueba de que nunca varíe. La misma corrección mostró la fragilidad del juez: solo por cambiar el orden del texto, el anclaje de A05 pasó de 0,78 a 0,29.
+El anclaje distingue, con ruido. Los casos correctos promedian 0,92. El control usa pasajes de otro documento que no contienen la respuesta esperada, y debe puntuar bajo: promedia 0,14 y queda por debajo del anclaje real en 31 de 34 casos. El juez distingue, pero con errores en ambos sentidos: cuatro controles superan 0,5 cuando sus pasajes no contienen el texto esperado. Este valor es orientativo. La misma fragilidad apareció al cambiar solo el orden del texto: el anclaje de A05 pasó de 0,78 a 0,29.
 
-La relevancia de \texttt{laya} no es confiable aquí. El valor de 0,37 parece muy malo, pero 9 de los 25 casos correctos obtienen 0, incluso cuando el único pasaje contiene la respuesta exacta (A19, I05). Parte del valor bajo es real, porque la respuesta incluye pasajes sobrantes; otra parte es un error del juez, que el grupo no puede separar con estos datos. Se usa \texttt{laya} como pide el enunciado, pero las conclusiones se apoyan en las métricas deterministas. El propio autor de \texttt{laya} reporta un rendimiento limitado sin ajuste fino.
+La reproducibilidad se mantiene. Dos ejecuciones con arranques separados del servidor dieron pasajes y orden idénticos en los 66 casos (\texttt{evaluation\_reproducibility.csv}). En una versión anterior, el orden de pasajes con el mismo puntaje RRF variaba, y se corrigió con un desempate por identificador. Son dos ejecuciones sobre un corpus fijo, no una prueba de que nunca varíe.
+
+La relevancia de \texttt{laya} no es confiable aquí. 15 de los 31 casos correctos con pasajes obtienen 0, incluso cuando el único pasaje contiene la respuesta exacta. Parte del valor bajo es real, porque la respuesta incluye pasajes sobrantes; otra parte es un error del juez, que el grupo no puede separar con estos datos. Se usa \texttt{laya} como pide el enunciado, pero las conclusiones se apoyan en las métricas deterministas.
+
+\subsection{Experimento de mitigación del ``no sé''}\label{sec:mitigacion}
+
+El umbral de similitud dice si un pasaje está cerca de la pregunta, no si la cubre. Las respuestas falsas conocidas compartían vocabulario con el corpus: ``proveedor'', ``medición'', ``mantenimiento''. Se evaluaron tres medidas sobre los casos ya conocidos:
+
+\begin{itemize}
+  \item Priorizar documentos operativos sobre actas y comunicaciones. Descartada: de las cinco respuestas falsas conocidas, solo una citaba una comunicación; las otras cuatro citaban manuales o normativa. Además, la pregunta A20 espera precisamente un acta.
+  \item Un reranker local. Postergada: agrega un modelo, una dependencia y una calibración propia, y no se midió.
+  \item Una guarda léxica. Elegida: un pasaje sustenta la respuesta solo si menciona al menos la mitad de los términos de contenido de la pregunta, sin palabras interrogativas, con raíz de cinco letras y contando su sección padre. Tiene un solo parámetro, la mitad, elegido por ser la mayoría y no ajustado a ningún caso.
+\end{itemize}
+
+Para medirla sin sesgo, primero se escribieron 17 casos holdout, 7 con respuesta y 10 cercanos al corpus pero sin respuesta en él, verificada contra el texto de los documentos. Se congelaron en un commit antes de implementar la guarda. Después se ejecutó el arnés una vez con cada variante (\texttt{evaluation\_mitigation\_none} y \texttt{evaluation\_mitigation\_lexical}).
+
+\begin{table}[H]
+\centering
+\caption{Guarda léxica frente al baseline}\label{tab:mitigacion}
+\begin{tabular}{L{6.6cm} L{2.6cm} L{2.6cm} L{3.6cm}}
+  \tblhead Indicador & \color{white}\bfseries Sin guarda & \color{white}\bfseries Con guarda & \color{white}\bfseries Lectura\\
+  Holdout: respuestas falsas fuera del corpus & 4/10 & 1/10 & Mejora en casos no vistos\\
+  Holdout: preguntas con respuesta correctas & 7/7 & 7/7 & Sin costo en casos no vistos\\
+  Todos: respuestas falsas fuera del corpus & 8/19 & 2/19 & Incluye casos ya conocidos\\
+  Todos: preguntas con respuesta correctas & 27/29 & 26/29 & Se pierde A17\\
+  Desviación total & 17~\% & 9~\% & \\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+El costo es real: A17 pregunta después de cuánto tiempo de parada aplica el arranque en frío de una bomba, y el fragmento que responde menciona solo tres de sus siete términos. La guarda lo descarta y queda un pasaje que no contiene el valor. Es el riesgo esperado de una regla léxica: falla cuando la pregunta y el documento usan palabras distintas. Se adoptó porque mejora los casos no vistos sin perder respuestas válidas en ellos; la variante sin guarda se reproduce con \texttt{ANSWER\_GUARD=none}.
+
+Dos efectos no se deben atribuir a la guarda. La pregunta O04, sobre el proveedor de los medidores de ultrasonido, era una respuesta falsa que citaba MAN-OPE-004; ahora se rechaza porque ese manual está en duda, es decir, por gobierno y no por recuperación. Y la guarda no resuelve O09, N08 ni D01, cuyos pasajes comparten la mayoría de los términos de la pregunta sin responderla.
 
 \subsection{Valores inaceptables en operación}
 
-Estos valores son una propuesta del grupo, no un requisito del enunciado.
+Estos valores son una propuesta del grupo, no un requisito del enunciado. La respuesta falsa se mide en los holdout, por ser los únicos no vistos.
 
 \begin{table}[H]
 \centering
 \caption{Valores inaceptables propuestos}\label{tab:inaceptables}
 \begin{tabular}{L{6.2cm} L{2.6cm} L{2.4cm} L{3.8cm}}
   \tblhead Indicador & \color{white}\bfseries Inaceptable & \color{white}\bfseries Medido & \color{white}\bfseries Estado\\
-  Exposición de documentos excluidos & Cualquiera & 0/5 & Cumple\\
+  Exposición de documentos excluidos & Cualquiera & 0/7 & Cumple\\
   Exposición de contenido malicioso & Cualquiera & 0/2 & Cumple\\
-  Respuesta falsa fuera del corpus & Más de 5~\% & 56~\% & No cumple\\
-  Respuesta con el pasaje equivocado & Más de 2~\% & 9~\% & No cumple\\
-  Hit en casos nuevos & Menos de 0,95 & 0,86 & No cumple\\
-  Anclaje (orientativo) & Menos de 0,90 & 0,83 & No cumple\\
-  Latencia máxima & Más de 5 s & 137 ms & Cumple\\
+  Respuesta falsa fuera del corpus (holdout) & Más de 5~\% & 10~\% & No cumple\\
+  Respuesta con el pasaje equivocado & Más de 2~\% & 10~\% & No cumple\\
+  Hit en casos nuevos y holdout & Menos de 0,95 & 0,86 y 1,00 & No cumple en nuevos\\
+  Anclaje (orientativo) & Menos de 0,90 & 0,84 & No cumple\\
+  Latencia máxima & Más de 5 s & 1,4 s & Cumple\\
+  Propagación de la vigencia (servidor) & Más de 15 min & 2,05 s & Cumple\\
   \bottomrule
 \end{tabular}
 \end{table}
 
-Conclusión: el prototipo cumple los controles de gobierno, pero no está listo para operar sin supervisión. Con estos resultados, debe usarse como apoyo de búsqueda, con la cita como elemento central, y no como fuente directa de una respuesta.
+Conclusión: el prototipo cumple los controles de gobierno y mejoró el rechazo, pero no está listo para operar sin supervisión. Con estos resultados, debe usarse como apoyo de búsqueda, con la cita como elemento central, y no como fuente directa de una respuesta.
 
 \subsection{Comparación con la partición de tamaño fijo}\label{sec:particion}
 
-Como anticipó el ADR-02, los mismos casos se ejecutaron sobre una colección de ventanas fijas de 120 palabras con solapamiento de 20, con el mismo servicio y el mismo umbral.
+Como anticipó el ADR-02, los mismos casos se ejecutaron sobre una colección de ventanas fijas de 120 palabras con solapamiento de 20, con el mismo servicio, el mismo umbral y la misma guarda.
 
 \begin{table}[H]
 \centering
@@ -122,21 +160,21 @@ Como anticipó el ADR-02, los mismos casos se ejecutaron sobre una colección de
 \begin{tabular}{L{6.4cm} L{3.2cm} L{3.2cm}}
   \tblhead Indicador & \color{white}\bfseries Estructural & \color{white}\bfseries Tamaño fijo\\
   Fragmentos & 112 & 43\\
-  Desviación total & 7/46 (15~\%) & 8/46 (17~\%)\\
-  Fallos con respuesta & 2/22 & 6/22\\
-  Fallos fuera del corpus & 5/9 & 2/9\\
+  Desviación total & 6/66 (9~\%) & 10/66 (15~\%)\\
+  Fallos con respuesta & 3/29 & 7/29\\
+  Fallos fuera del corpus & 2/19 & 2/19\\
   Citan una sección del documento & Sí & No\\
   \bottomrule
 \end{tabular}
 \end{table}
 
-La diferencia total es muy pequeña y no demuestra que la partición estructural sea mejor en todo. Responde mejor las preguntas válidas, pero rechaza peor las de fuera del corpus. Además, el umbral se calibró con la partición estructural, lo que la favorece. El Hit de la partición fija no se compara, porque sus fragmentos no tienen el identificador esperado.
+La partición estructural responde mejor las preguntas válidas, y con la guarda ambas rechazan igual las de fuera del corpus. La diferencia no demuestra que sea mejor en todo: el umbral se calibró con ella, lo que la favorece. El Hit de la partición fija no se compara, porque sus fragmentos no tienen el identificador esperado.
 
-La decisión del ADR-02 se mantiene por dos motivos que esta medición no reemplaza: la exigencia de citar la sección, que una ventana fija no permite, y la retención precisa. Con ventanas fijas, el detector marcó dos fragmentos de COM-PRV-0134, lo que retendría también contenido legítimo.
+La decisión del ADR-02 se mantiene, además, por dos motivos que esta medición no reemplaza: la exigencia de citar la sección, que una ventana fija no permite, y la retención precisa. Con ventanas fijas, el detector marcó dos fragmentos de COM-PRV-0134, lo que retendría también contenido legítimo.
 
 \subsection{Resultado: citas verdaderas que no responden la pregunta}\label{sec:citas-erradas}
 
-Al revisar manualmente las respuestas, se encontró un fallo que las pruebas automáticas no detectan. En dos preguntas que el corpus sí responde, el servicio devuelve pasajes literales y bien citados que no contienen la respuesta o la ponen después de otra que no aplica. La cita es verdadera; lo que el usuario puede concluir, no. El arnés marca la primera como fallo (A14) y la segunda como acierto (A15), porque el plan sí aparece.
+Al revisar manualmente las respuestas, se encontró un fallo que las pruebas automáticas no detectan del todo. En preguntas que el corpus sí responde, el servicio devuelve pasajes literales y bien citados que no contienen la respuesta o la ponen después de otra que no aplica. La cita es verdadera; lo que el usuario puede concluir, no. El arnés marca A14 como fallo y A15 como acierto, porque el plan sí aparece.
 
 \begin{table}[H]
 \centering
@@ -149,10 +187,10 @@ Al revisar manualmente las respuestas, se encontró un fallo que las pruebas aut
 \end{tabular}
 \end{table}
 
-Causa. El umbral decide si hay soporte, no si el pasaje es el correcto. En la presión, el fragmento correcto queda por debajo (0,8323); en la lubricación, lo supera (0,8424), pero la recomendación se parece más a la pregunta.
+Causa. El umbral decide si hay soporte, no si el pasaje es el correcto. En la presión, el fragmento correcto queda por debajo (0,8323); en la lubricación, lo supera (0,8424), pero la recomendación se parece más a la pregunta. La guarda léxica no corrige estos casos: los pasajes equivocados mencionan los términos de la pregunta.
 
 Qué garantiza el diseño y qué no. La composición determinista del ADR-03 impide inventar texto y alterar valores, pero no impide mostrar un pasaje equivocado. El anclaje lo señala en evaluación (A14: 0,00), porque se compara con la respuesta esperada; en operación esa respuesta no existe, así que nada lo detecta.
 
 Con un modelo como cliente. En una prueba con Claude (sección~\ref{sec:contrato-mcp}), la misma pregunta por la máxima presión recibió los mismos pasajes. El modelo notó que no respondían, buscó de nuevo con el término técnico MAOP y llegó a 1.250 psi, citando MAN-OPE-001 v3 y advirtiendo que no debía confundirse con el umbral de alarma. El servicio por sí solo sigue fallando: esa corrección viene del cliente, que usó su conocimiento del término para reformular. Es una sola ejecución, depende del modelo y no puede ser la defensa del servicio. Sí es un argumento para el Escenario B: juzgar si un pasaje responde y reformular es una función que justifica un enfoque agéntico, mientras que la vigencia y la retención deben seguir en el servidor.
 
-Decisión. El fallo se reporta y no se corrige por ahora. Ajustar reglas para estas dos preguntas, ya conocidas, mejoraría la demostración sin mostrar cuánto falla el sistema. Estos casos entran al conjunto de referencia, de modo que el arnés mida con qué frecuencia ocurre. Con esa medición se evaluarán medidas como priorizar los documentos operativos sobre los registros.
+Decisión. Estos fallos se reportan y no se corrigen con reglas hechas para ellos: ajustar el sistema a dos preguntas ya conocidas mejoraría la demostración sin mostrar cuánto falla. Se miden en el arnés, de modo que una medida futura, como un reranker, pueda evaluarse sobre ellos y sobre casos no vistos.

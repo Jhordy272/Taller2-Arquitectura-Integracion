@@ -214,13 +214,14 @@ La Tabla~\ref{tab:instanciacion} ubica cada decisión en el elemento del reposit
 \caption{Evidencia de cada decisión}\label{tab:validacion}
 \begin{tabular}{L{1.6cm} L{14.0cm}}
   \tblhead ADR & \color{white}\bfseries Evidencia\\
-  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 5/5 casos de referencia.\\
+  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 7/7 casos de referencia.\\
   ADR-02 & Los 19 PDF coinciden con su Markdown. Comparación con tamaño fijo en la sección~\ref{sec:particion}.\\
-  ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 46/46 casos.\\
-  ADR-04 & Hit de 0,86 en casos nuevos. El servidor no arranca con un modelo distinto al de la colección.\\
-  ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. Latencia máxima de 137 ms frente a los 5 s de EI16.\\
+  ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 66/66 casos.\\
+  ADR-04 & Hit de 0,86 en casos nuevos y 1,00 en holdout. El servidor no arranca con un modelo distinto al de la colección.\\
+  ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. La guarda léxica baja las respuestas falsas en holdout de 4/10 a 1/10. Latencia máxima de 1,4 s frente a los 5 s de EI16.\\
   ADR-06 & El anexo malicioso se retiene en todas las pruebas; el detector cubre 5/13 variantes (sección~\ref{sec:envenenamiento}).\\
-  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}).\\
+  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}). MAN-OPE-004, en duda, se excluye sin contenido; un cambio del registro llega a las respuestas en 2,05 s como máximo.\\
+  ADR-08 & Un cliente por \texttt{stdio} negocia la revisión 2026-07-28 y recibe \texttt{ttlMs} y \texttt{cacheScope} en los listados y el registro como resource.\\
   \bottomrule
 \end{tabular}
 \end{table}

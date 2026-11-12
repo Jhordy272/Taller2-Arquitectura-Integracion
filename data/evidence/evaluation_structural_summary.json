@@ -1,80 +1,92 @@
 {
   "overall": {
-    "cases": 46,
-    "deviation_rate": 0.1522,
+    "cases": 66,
+    "deviation_rate": 0.0909,
     "outcomes": {
-      "correct": 39,
-      "wrong_answer": 2,
-      "false_answer": 5
+      "correct": 60,
+      "wrong_answer": 3,
+      "false_answer": 3
     },
-    "hit_rate": 0.9259,
-    "mrr": 0.8457,
-    "anchoring": 0.8303,
-    "anchoring_control": 0.2897,
-    "relevance": 0.3667
+    "hit_rate": 0.9118,
+    "mrr": 0.8392,
+    "anchoring": 0.8375,
+    "anchoring_control": 0.1449,
+    "relevance": 0.425
   },
   "by_origin": {
-    "new": {
-      "cases": 18,
-      "deviation_rate": 0.2222,
+    "holdout": {
+      "cases": 17,
+      "deviation_rate": 0.0588,
       "outcomes": {
-        "correct": 14,
+        "correct": 16,
+        "false_answer": 1
+      },
+      "hit_rate": 1.0,
+      "mrr": 0.8857,
+      "anchoring": 0.9513,
+      "anchoring_control": 0.1336,
+      "relevance": 0.1786
+    },
+    "new": {
+      "cases": 21,
+      "deviation_rate": 0.1429,
+      "outcomes": {
+        "correct": 18,
         "wrong_answer": 1,
-        "false_answer": 3
+        "false_answer": 2
       },
       "hit_rate": 0.8571,
       "mrr": 0.8571,
-      "anchoring": 0.6938,
-      "anchoring_control": 0.2361,
+      "anchoring": 0.7608,
+      "anchoring_control": 0.2349,
       "relevance": 0.1429
     },
     "validation": {
       "cases": 5,
-      "deviation_rate": 0.4,
+      "deviation_rate": 0.0,
       "outcomes": {
-        "correct": 3,
-        "false_answer": 2
+        "correct": 5
       },
       "hit_rate": 1.0,
       "mrr": 0.8333,
-      "anchoring": 0.982,
-      "anchoring_control": 0.6069,
-      "relevance": 0.3333
+      "anchoring": 0.9949,
+      "anchoring_control": 0.0443,
+      "relevance": 0.5556
     },
     "tuning": {
       "cases": 23,
-      "deviation_rate": 0.0435,
+      "deviation_rate": 0.087,
       "outcomes": {
-        "correct": 22,
-        "wrong_answer": 1
+        "correct": 21,
+        "wrong_answer": 2
       },
-      "hit_rate": 0.9412,
-      "mrr": 0.8431,
-      "anchoring": 0.8597,
-      "anchoring_control": 0.2559,
-      "relevance": 0.4647
+      "hit_rate": 0.8824,
+      "mrr": 0.8137,
+      "anchoring": 0.7944,
+      "anchoring_control": 0.1303,
+      "relevance": 0.6196
     }
   },
   "by_kind": {
     "answerable": {
-      "cases": 22,
-      "deviation_rate": 0.0909,
+      "cases": 29,
+      "deviation_rate": 0.1034,
       "outcomes": {
-        "correct": 20,
-        "wrong_answer": 2
+        "correct": 26,
+        "wrong_answer": 3
       },
-      "hit_rate": 0.9091,
-      "mrr": 0.8106,
-      "anchoring": 0.8378,
-      "anchoring_control": 0.3408,
-      "relevance": 0.3136
+      "hit_rate": 0.8966,
+      "mrr": 0.8115,
+      "anchoring": 0.8444,
+      "anchoring_control": 0.1586,
+      "relevance": 0.3948
     },
     "out_of_corpus": {
-      "cases": 9,
-      "deviation_rate": 0.5556,
+      "cases": 19,
+      "deviation_rate": 0.1053,
       "outcomes": {
-        "correct": 4,
-        "false_answer": 5
+        "correct": 17,
+        "false_answer": 2
       },
       "hit_rate": null,
       "mrr": null,
@@ -91,7 +103,7 @@
       "hit_rate": 1.0,
       "mrr": 1.0,
       "anchoring": 0.7973,
-      "anchoring_control": 0.0653,
+      "anchoring_control": 0.0656,
       "relevance": 0.6
     },
     "unknown_identifier": {
@@ -107,10 +119,22 @@
       "relevance": null
     },
     "excluded": {
-      "cases": 5,
+      "cases": 7,
       "deviation_rate": 0.0,
       "outcomes": {
-        "correct": 5
+        "correct": 7
+      },
+      "hit_rate": null,
+      "mrr": null,
+      "anchoring": null,
+      "anchoring_control": null,
+      "relevance": null
+    },
+    "in_doubt_content": {
+      "cases": 1,
+      "deviation_rate": 1.0,
+      "outcomes": {
+        "false_answer": 1
       },
       "hit_rate": null,
       "mrr": null,
@@ -132,9 +156,9 @@
     }
   },
   "latency_ms": {
-    "median": 31.6,
-    "p95": 76.4,
-    "max": 136.5,
+    "median": 26.5,
+    "p95": 75.5,
+    "max": 1411.8,
     "commitment": 5000.0,
     "within_commitment": true
   }
