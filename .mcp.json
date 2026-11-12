@@ -2,7 +2,7 @@
   "mcpServers": {
     "petroandes-documents": {
       "type": "stdio",
-      "command": "venv/Scripts/python.exe",
+      "command": "${PETROANDES_PYTHON:-venv/bin/python}",
       "args": ["-m", "app.main"],
       "env": {
         "PYTHONPATH": "mcp_server"

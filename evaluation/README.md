@@ -4,9 +4,9 @@ Arnés de evaluación. Ejecuta los casos de referencia contra el servidor, repor
 
 ## Cómo ejecutarlo
 
-Desde esta carpeta, con el `venv` activado, Qdrant arriba y el corpus cargado:
+Desde esta carpeta, con el `venv` activado, Qdrant arriba y el corpus cargado. Los comandos son iguales en PowerShell y en bash:
 
-```powershell
+```bash
 # Evaluación completa. La primera vez, laya descarga su modelo.
 python -m app.main
 
@@ -17,9 +17,9 @@ python -m app.main --no-judge
 python -m app.main --reproducibility
 
 # Comparar con la partición de tamaño fijo
-cd ..\ingestion
+cd ../ingestion
 python -m app.main --baseline
-cd ..\evaluation
+cd ../evaluation
 python -m app.main --collection corpus_baseline_fixed_size --label fixed_size --no-judge
 
 # Pruebas: no requieren Qdrant, el servidor ni laya

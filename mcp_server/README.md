@@ -4,9 +4,9 @@ Servidor MCP que responde consultas con pasajes literales y citados, solo de doc
 
 ## Cómo ejecutarlo
 
-Desde esta carpeta, con el `venv` activado, Qdrant arriba y el corpus cargado:
+Desde esta carpeta, con el `venv` activado, Qdrant arriba y el corpus cargado. Los comandos son iguales en PowerShell y en bash:
 
-```powershell
+```bash
 # Abrir el servidor MCP en MCP Inspector
 npx @modelcontextprotocol/inspector python -m app.main
 

@@ -4,9 +4,9 @@ Lleva los documentos del corpus a la base vectorial. Lee cada PDF, verifica que 
 
 ## Cómo ejecutarlo
 
-Desde esta carpeta, con el `venv` activado:
+Desde esta carpeta, con el `venv` activado. Los comandos son iguales en PowerShell y en bash:
 
-```powershell
+```bash
 # Validar cada PDF y llevar los datos a Qdrant. Requiere Qdrant arriba.
 # La primera vez descarga el modelo de embeddings.
 python -m app.main
@@ -18,7 +18,7 @@ python -m app.main --activate
 python -m app.main --baseline
 
 # Propagar un cambio del registro de vigencia, sin recalcular vectores.
-# Después hay que reiniciar mcp_server.
+# mcp_server ya aplica el cambio al releer el registro; esto alinea el estado en Qdrant.
 python -m app.main --sync-validity
 
 # Medir el detector de inyección con variantes de ataque
