@@ -8,3 +8,60 @@ PetroAndes acumula décadas de conocimiento operativo en documentos: manuales de
 La dirección de tecnología plantea un servicio de consulta documental gobernado, que responda preguntas de operación citando documento, versión y sección, y que nunca cite material derogado. Este documento presenta su diseño e implementación.
 
 Restricción heredada del Taller 1: ningún componente de este taller accede directamente a sistemas OT. Consume exclusivamente datos ya publicados a través de la DMZ industrial.
+
+\subsection{Motivadores y restricciones}
+
+\begin{table}[H]
+\centering
+\caption{Motivadores de negocio y restricciones}\label{tab:motivadores}
+\begin{tabular}{L{1.6cm} L{14.0cm}}
+  \tblhead Id & \color{white}\bfseries Motivador o restricción\\
+  MN01 & Sustentar ante el regulador (CREG, ANH) que cada respuesta operativa se apoya en la norma y el procedimiento vigentes.\\
+  MN02 & Reducir el tiempo que toma encontrar un valor, plazo o responsable en el corpus documental.\\
+  MN03 & Evitar incidentes por aplicar un procedimiento o umbral derogado.\\
+  RE01 & Ningún componente accede a OT; solo consume datos publicados (Taller 1).\\
+  RE02 & El contenido de los documentos internos no sale de la infraestructura de la compañía (restricción adoptada por el grupo, ADR-03 y ADR-04).\\
+  RE03 & La vigencia es una decisión de gobierno: la certifica el área emisora, no el sistema (ACTA-CTO-2025-11, numeral 4.2).\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Escenarios de calidad}
+
+Cada escenario se expresa en seis partes. La medida es la meta de diseño; la sección~\ref{sec:evaluacion} reporta si el prototipo la cumple.
+
+\begin{longtable}{L{1.3cm} L{2.2cm} L{2.6cm} L{1.9cm} L{2.0cm} L{3.0cm} L{2.6cm}}
+  \caption{Escenarios de calidad}\label{tab:escenarios}\\
+  \tblhead Id & \color{white}\bfseries Fuente & \color{white}\bfseries Estímulo & \color{white}\bfseries Artefacto & \color{white}\bfseries Entorno & \color{white}\bfseries Respuesta & \color{white}\bfseries Medida\\
+  \endfirsthead
+  \multicolumn{7}{l}{\small\textit{Tabla~\ref{tab:escenarios} -- continuación}}\\[2pt]
+  \tblhead Id & \color{white}\bfseries Fuente & \color{white}\bfseries Estímulo & \color{white}\bfseries Artefacto & \color{white}\bfseries Entorno & \color{white}\bfseries Respuesta & \color{white}\bfseries Medida\\
+  \endhead\bottomrule\endlastfoot
+  EI16 & Operador o analista & Pregunta de operación & Servidor MCP & Operación normal & Pasajes literales con documento, versión y sección vigentes & p95 $\le$ 5 s; toda afirmación citada\\
+  DE02 & Área emisora & Cambia la vigencia de un documento & Registro e índice & Operación normal & El servicio deja de citarlo, o vuelve a citarlo & $\le$ 15 min (p95) de punta a punta\\
+  EQ01 & Usuario & Pregunta cuya respuesta no está en el corpus vigente & Composición de la respuesta & Operación normal & Rechazo explícito, sin pasajes & Respuestas falsas $\le$ 5~\% en casos no vistos\\
+  EQ02 & Registro de vigencia & Documento en duda o derogado & Búsqueda y herramientas & Operación normal o durante un cambio & Se excluye y se informa su estado, sin contenido & 0 pasajes de documentos no vigentes\\
+  SE01 & Cualquier componente & Intento de acceso a OT & Despliegue & Producción & No existe la ruta & 0 conexiones hacia los niveles 3 a 0\\
+  SE02 & Documento del corpus & Contenido con instrucciones para un sistema automático & Ingesta y respuesta & Operación normal & El texto se retiene; se entrega la cita y una alerta & 0 instrucciones conocidas entregadas\\
+  MO01 & Equipo de arquitectura & Cambio del modelo de embeddings & Índice & Mantenimiento & Colección nueva en paralelo, evaluada antes de activarse & Sin indisponibilidad; retroceso por alias\\
+\end{longtable}
+
+\subsection{Árbol de utilidad}
+
+\begin{table}[H]
+\centering
+\caption{Árbol de utilidad: importancia para el negocio (I) y dificultad arquitectónica (D)}\label{tab:utilidad}
+\begin{tabular}{L{3.2cm} L{3.4cm} L{1.4cm} L{5.4cm} L{1.0cm} L{1.0cm}}
+  \tblhead Atributo & \color{white}\bfseries Refinamiento & \color{white}\bfseries Escenario & \color{white}\bfseries Decisiones & \color{white}\bfseries I & \color{white}\bfseries D\\
+  Integridad de la respuesta & Nunca citar derogado & EQ02 & ADR-05, ADR-07 & Alta & Media\\
+   & Negativa honesta & EQ01 & ADR-03, ADR-05 & Alta & Alta\\
+  Desempeño & Consulta citada & EI16 & ADR-01, ADR-02, ADR-05 & Alta & Baja\\
+  Frescura & Propagación de la vigencia & DE02 & ADR-07, ADR-08 & Alta & Media\\
+  Seguridad & Aislamiento de OT & SE01 & Despliegue (sección~\ref{sec:operacion}) & Alta & Baja\\
+   & Inyección indirecta & SE02 & ADR-06 & Alta & Alta\\
+  Modificabilidad & Cambio de embeddings & MO01 & ADR-04 & Media & Media\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
+Los escenarios de importancia y dificultad altas, EQ01 y SE02, son los que concentran los fallos medidos (secciones~\ref{sec:evaluacion} y~\ref{sec:envenenamiento}).

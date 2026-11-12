@@ -27,6 +27,7 @@ infraestructura. Los detalles de implementación de cada decisión están en la 
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-01}{Motor vectorial dedicado frente a extensión de un motor existente}{Aceptada}
+\adrcampo{Escenarios} EI16, EQ02. \textbf{Táctica:} Filtrado durante la búsqueda (limitar el acceso a los datos); un solo motor para ambas ramas.
 \adrcampo{Contexto}
 La recuperación debe combinar búsqueda semántica y léxica, y aplicar el filtro de vigencia antes o junto con la similitud,
 nunca después. El volumen del corpus no exige un motor especializado: se decide por las garantías de la consulta, no por escala.
@@ -52,6 +53,7 @@ Se agrega un servicio a operar. Si PetroAndes estandariza PostgreSQL, esta decis
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-02}{Estrategia de partición}{Aceptada}
+\adrcampo{Escenarios} EI16, EQ01. \textbf{Táctica:} Unidad de partición alineada con la unidad de cita; contexto padre como enriquecimiento.
 \adrcampo{Contexto}
 Cada afirmación debe citar documento, versión y sección. Los documentos son cortos (de 188 a 440 palabras) y tienen estructura explícita:
 secciones, numerales, artículos y tablas con umbrales.
@@ -75,6 +77,7 @@ La calidad depende de reconocer la estructura en los PDF, que es el punto más f
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-03}{Composición de la respuesta}{Aceptada}
+\adrcampo{Escenarios} EQ01, EI16. \textbf{Táctica:} Restringir la salida a datos verificables; rechazo explícito como respuesta válida.
 \adrcampo{Contexto}
 La respuesta debe citar documento, versión y sección en toda afirmación, no usar conocimiento ajeno al contexto recuperado y declarar cuándo la respuesta no está en el corpus.
 
@@ -102,6 +105,7 @@ Se cede la síntesis: el usuario lee pasajes, no una conclusión, y una pregunta
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-04}{Modelo de embeddings como dependencia versionada}{Aceptada}
+\adrcampo{Escenarios} MO01. \textbf{Táctica:} Dependencia versionada y despliegue azul-verde por alias, con retroceso.
 \adrcampo{Contexto}
 El corpus está en español, y los vectores de un modelo no son comparables con los de otro. Por eso el modelo es una dependencia del sistema, no un detalle de implementación.
 
@@ -124,6 +128,7 @@ Cambiar el modelo exige reindexar: construir un índice nuevo sin tocar el activ
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-05}{Recuperación híbrida con filtro obligatorio de vigencia}{Aceptada}
+\adrcampo{Escenarios} EI16, EQ01, EQ02. \textbf{Táctica:} Búsqueda redundante (semántica y léxica) con fusión; filtro obligatorio en el servidor; guarda de soporte.
 \adrcampo{Contexto}
 La similitud semántica falla con códigos y números de resolución, y una búsqueda vectorial siempre devuelve algo, aunque no sea pertinente. Además, nunca debe citarse material
 derogado, y ese requisito no puede depender de quien consulta.
@@ -151,6 +156,7 @@ La evaluación mostró que el umbral deja pasar preguntas cercanas al corpus (se
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-06}{Defensa ante inyección indirecta y exposición de contenido}{Aceptada}
+\adrcampo{Escenarios} SE02. \textbf{Táctica:} Validar y marcar en la ingesta; retener en la salida; mínimo privilegio (solo lectura).
 \adrcampo{Contexto}
 Un fragmento puede contener instrucciones dirigidas a un sistema automático, y un cliente respaldado por un modelo podría ejecutarlas o enviar el contenido a un tercero. El servidor no puede
 delegar estos riesgos, y el documento malicioso no puede retirarse del corpus.
@@ -176,6 +182,7 @@ Las reglas no detectan toda variante, y lo que no se detecta llega al cliente. U
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-07}{Regla de vigencia de los documentos}{Aceptada}
+\adrcampo{Escenarios} EQ02, DE02. \textbf{Táctica:} Fuente de verdad única con responsable; fallar de forma cerrada ante la duda.
 \adrcampo{Contexto}
 Ningún documento declara si está vigente, y la vigencia es una decisión de gobierno. El ACTA-CTO-2025-11 reconoce que el listado maestro no está actualizado y establece que, mientras no exista un registro único, certifica el área emisora (numeral 4.2).
 
@@ -220,6 +227,7 @@ La vigencia depende de que las áreas respondan: sin respuesta, el documento no 
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-08}{Contrato MCP: revisión 2026-07-28, herramientas y resources}{Aceptada}
+\adrcampo{Escenarios} DE02, EI16. \textbf{Táctica:} Declarar la frescura de cada listado; separar el contexto de la aplicación de las acciones del modelo.
 \adrcampo{Contexto}
 La sesión 12 pide declarar en los listados del servidor cuánto tiempo puede reutilizarlos un cliente (\texttt{ttlMs}) y si puede compartirlos entre contextos de autorización (\texttt{cacheScope}), y distinguir qué se expone como herramienta y qué como resource. Había que verificar si el SDK usado (\texttt{mcp} 2.3) soporta la revisión 2026-07-28 antes de decidir. Se verificó en su código: implementa \texttt{server/discover}, las pistas de caché por método y un middleware de OpenTelemetry que lee la traza de \texttt{\_meta}.
 
