@@ -33,7 +33,7 @@ python -m app.measure_propagation
 python -m pytest
 
 # Solo las que no requieren Qdrant
-python -m pytest tests/test_contracts.py tests/test_answer_rules.py tests/test_mcp_tools.py tests/test_registry_reload.py
+python -m pytest tests/test_contracts.py tests/test_answer_rules.py tests/test_mcp_tools.py tests/test_mcp_resources.py tests/test_registry_reload.py
 ```
 
 La configuración está en `app/config/Settings.py`, y se puede cambiar con un archivo `.env`, a partir de `.env.example`.

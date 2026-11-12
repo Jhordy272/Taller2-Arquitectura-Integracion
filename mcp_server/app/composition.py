@@ -26,12 +26,17 @@ def build_search_service() -> tuple[HybridSearchService, QdrantSearchRepository]
     return service, repository
 
 
-def build_composer() -> ResponseComposer:
+def build_registry() -> ReloadingValidityRegistry:
+    return ReloadingValidityRegistry(RegistryRepository(settings.validity_registry_path), settings.registry_check_interval_s)
+
+
+def build_composer(registry: ReloadingValidityRegistry | None = None) -> ResponseComposer:
+    """The server passes its registry so that the tools and the resources read the same one."""
     service, repository = build_search_service()
     return ResponseComposer(
         service,
         repository,
-        ReloadingValidityRegistry(RegistryRepository(settings.validity_registry_path), settings.registry_check_interval_s),
+        registry or build_registry(),
         settings.rejection_cosine_threshold,
         settings.default_result_limit,
     )
