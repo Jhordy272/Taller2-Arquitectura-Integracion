@@ -1,7 +1,7 @@
 % ================================================================
 %  Decisiones de arquitectura
 % ================================================================
-\section{Decisiones de arquitectura}
+\section{Decisiones de arquitectura}\label{sec:adrs-resumen}
 
 Las decisiones parten de dos hechos del caso: el corpus es pequeño (19 documentos y unas 5.500
 palabras) y mezcla identificadores exactos con lenguaje natural en español. Además, el grupo adopta
@@ -148,10 +148,10 @@ Combinar búsqueda semántica y léxica, con el filtro de vigencia aplicado siem
 Se encuentran tanto los códigos exactos como las preguntas en lenguaje natural, y ningún cliente puede saltarse la vigencia.
 
 \adrcampo{Consecuencias}
-El historial no es consultable: una auditoría requeriría otra capacidad. El rechazo de preguntas en lenguaje natural depende de un umbral de similitud, que falló en temas cercanos al corpus.
+El historial no es consultable: una auditoría requeriría otra capacidad. El rechazo de preguntas en lenguaje natural depende de un umbral de similitud, y una vecindad semántica no garantiza que el pasaje responda la pregunta.
 
 \adrcampo{Revisión: guarda léxica}
-La evaluación mostró que el umbral deja pasar preguntas cercanas al corpus (sección~\ref{sec:mitigacion}). Por eso se agrega una segunda condición: un pasaje sustenta la respuesta solo si menciona al menos la mitad de los términos de contenido de la pregunta, contando su sección padre. Se diseñó con los casos conocidos y se midió una sola vez sobre casos congelados antes del diseño, en los que bajó las respuestas falsas de 4 de 10 a 1 de 10 sin perder respuestas válidas. Se descartaron por ahora un reranker local, que agrega un modelo y una dependencia sin medición previa, y la prioridad por clase de documento, que no ataca el fallo: 4 de los 5 falsos conocidos citaban manuales o normativa. El costo es que una respuesta válida puede rechazarse si la pregunta usa palabras distintas a las del documento; ya ocurre en un caso conocido. La variante sin guarda se conserva con \texttt{ANSWER\_GUARD=none}.
+Un umbral de similitud por sí solo no distingue una pregunta cercana al corpus de una respondida por él. Por eso se agrega una segunda condición: un pasaje sustenta la respuesta solo si menciona al menos la mitad de los términos de contenido de la pregunta, contando su sección padre. Se descartan por ahora un reranker local, que agrega un modelo y una dependencia, y la prioridad por clase de documento, que no distingue si el pasaje responde la pregunta. El costo esperado es que una respuesta válida puede rechazarse si la pregunta usa palabras distintas a las del documento. La variante sin guarda se conserva con \texttt{ANSWER\_GUARD=none}. Su efecto se mide en la sección~\ref{sec:mitigacion}.
 \end{adr}
 
 % ----------------------------------------------------------------
@@ -209,7 +209,7 @@ Las reglas R1 a R3 demuestran que un documento \emph{no} está vigente; ser la �
   \item No vigente: el área lo certifica, a partir de evidencia de reemplazo o derogatoria, o de su propio retiro. Se excluye.
   \item En duda: el área aún no responde. Se excluye mientras tanto.
 \end{itemize}
-Una certificación no es permanente: debe renovarse periódicamente y cuando cambie la evidencia. En el corpus, el respaldo de cada propuesta de vigente es medio o alto solo en PRO-MED-007 v2 y PRO-OPE-012 v3, porque el ACTA-CTO-2025-11 los menciona; en los demás es una presunción.
+Una certificación no es permanente: debe renovarse periódicamente y cuando cambie la evidencia.
 
 \adrcampo{Alternativas descartadas}
 \begin{itemize}
@@ -222,14 +222,14 @@ Una certificación no es permanente: debe renovarse periódicamente y cuando cam
 Cada estado tiene una regla, una evidencia y un responsable identificado, y el servicio no cita un documento sin certificar.
 
 \adrcampo{Consecuencias}
-La vigencia depende de que las áreas respondan: sin respuesta, el documento no se cita. En el prototipo no hay áreas reales, así que los documentos sin certeza se marcan como vigentes en nombre de su área, salvo MAN-OPE-004, que queda en duda para mostrar el tercer estado con el corpus real (sección~\ref{sec:marcacion}). Los otros dos manuales siguen asumidos como vigentes, de modo que el prototipo aún podría citar el manual retirado que menciona el ACTA-CTO-2025-11, un riesgo que se acepta y se declara. La sección~\ref{sec:operacion} define el plazo de certificación, la renovación y el escalamiento.
+La vigencia depende de que las áreas respondan: sin respuesta, el documento no se cita. La exactitud del registro depende de la certificación de cada área: si un área certifica como vigente un documento retirado, el servicio lo citará. La sección~\ref{sec:marcacion} muestra el registro del experimento y la sección~\ref{sec:operacion} define el plazo de certificación, la renovación y el escalamiento.
 \end{adr}
 
 % ----------------------------------------------------------------
 \begin{adr}{ADR-08}{Contrato MCP: revisión 2026-07-28, herramientas y resources}{Aceptada}
 \adrcampo{Escenarios} DE02, EI16. \textbf{Táctica:} Declarar la frescura de cada listado; separar el contexto de la aplicación de las acciones del modelo.
 \adrcampo{Contexto}
-La sesión 12 pide declarar en los listados del servidor cuánto tiempo puede reutilizarlos un cliente (\texttt{ttlMs}) y si puede compartirlos entre contextos de autorización (\texttt{cacheScope}), y distinguir qué se expone como herramienta y qué como resource. Había que verificar si el SDK usado (\texttt{mcp} 2.3) soporta la revisión 2026-07-28 antes de decidir. Se verificó en su código: implementa \texttt{server/discover}, las pistas de caché por método y un middleware de OpenTelemetry que lee la traza de \texttt{\_meta}.
+La sesión 12 pide declarar en los listados del servidor cuánto tiempo puede reutilizarlos un cliente (\texttt{ttlMs}) y si puede compartirlos entre contextos de autorización (\texttt{cacheScope}), y distinguir qué se expone como herramienta y qué como resource. El SDK usado (\texttt{mcp} 2.3) implementa la revisión 2026-07-28: \texttt{server/discover}, las pistas de caché por método y un middleware de OpenTelemetry que lee la traza de \texttt{\_meta}.
 
 \adrcampo{Decisión}
 Adoptar la revisión 2026-07-28 con el soporte del SDK. La búsqueda y la obtención de fragmentos siguen siendo herramientas, porque las invoca el modelo; el registro de vigencia se publica como resource, porque lo carga la aplicación o el usuario. Los listados y el descubrimiento se declaran reutilizables por una hora y públicos; el registro, por no más que el intervalo de recarga del servidor (2 s). Las búsquedas no se declaran cacheables.

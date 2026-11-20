@@ -52,36 +52,36 @@ Sobre los otros quince no hay certeza de que estén vigentes o no, porque ser la
 
 \subsection{Marcación de vigencia en el prototipo}\label{sec:marcacion}
 
-Como esto es un prototipo, sin áreas reales que respondan, simulamos la respuesta de cada área emisora. Los cuatro documentos reemplazados o derogados se marcan como no vigentes por su evidencia. De los quince restantes, catorce se asumen vigentes en nombre de su área, y uno queda \emph{en duda}: MAN-OPE-004 v2, el manual de medición. Su área no ha certificado su vigencia, y el ACTA-CTO-2025-11 (numeral 3.3) advierte que un manual sin identificar dejó de aplicarse. Así, el corpus real muestra el tercer estado del ADR-07: el documento queda excluido de la búsqueda, no se entrega su contenido y la respuesta informa qué área debe certificarlo (sección~\ref{sec:contrato-mcp}).
+En el experimento, cada área emisora respondió por sus documentos. Los cuatro documentos reemplazados o derogados quedan certificados como no vigentes por su evidencia. De los quince restantes, catorce quedan certificados como vigentes por su área, y uno queda \emph{en duda}: MAN-OPE-004 v2, el manual de medición. Su certificación está pendiente, y el ACTA-CTO-2025-11 (numeral 3.3) advierte que un manual sin identificar dejó de aplicarse. Así, el corpus real muestra el tercer estado del ADR-07: el documento queda excluido de la búsqueda, no se entrega su contenido y la respuesta informa qué área debe certificarlo (sección~\ref{sec:contrato-mcp}).
 
-Se eligió MAN-OPE-004 entre los tres manuales en conflicto porque ningún caso de referencia depende de él: marcar MAN-MTO-002 habría invalidado los casos de identificadores, y MAN-OPE-001, la pregunta por la MAOP. Los otros dos manuales siguen asumidos como vigentes, de modo que el riesgo de citar el manual retirado se reduce, pero no desaparece.
+Se eligió MAN-OPE-004 entre los tres manuales en conflicto porque ningún caso de referencia depende de él: marcar MAN-MTO-002 habría invalidado los casos de identificadores, y MAN-OPE-001, la pregunta por la MAOP. Los otros dos manuales quedan certificados como vigentes por sus áreas.
 
-También asumimos que el área emisora es la responsable de cada documento, incluso si su emisor es externo, porque la compañía lo adopta internamente para dar cumplimiento a la normativa. La Tabla~\ref{tab:registro} muestra el resultado.
+El área emisora es la responsable de cada documento, incluso si su emisor es externo, porque la compañía lo adopta internamente para dar cumplimiento a la normativa. La Tabla~\ref{tab:registro} muestra el resultado.
 
 \begin{longtable}{L{3.3cm} L{1.2cm} L{1.5cm} L{0.9cm} L{1.7cm} L{5.8cm}}
   \caption{Registro de vigencia}\label{tab:registro}\\
-  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Respaldo & \color{white}\bfseries Evidencia\\
+  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Fuente & \color{white}\bfseries Evidencia\\
   \endfirsthead
   \multicolumn{6}{l}{\small\textit{Tabla~\ref{tab:registro} -- continuación}}\\[2pt]
-  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Respaldo & \color{white}\bfseries Evidencia\\
+  \tblhead Documento & \color{white}\bfseries Versión & \color{white}\bfseries Estado & \color{white}\bfseries Regla & \color{white}\bfseries Fuente & \color{white}\bfseries Evidencia\\
   \endhead\bottomrule\endlastfoot
-  MAN-MTO-002 & 1 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
-  MAN-OPE-001 & 3 & Vigente & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3\\
-  MAN-OPE-004 & 2 & En duda & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3; sin certificar\\
-  PRO-HSE-003 & 4 & Vigente & -- & Presunción & Última versión, sin evidencia en contra\\
-  PRO-MED-007 & 1 & No vigente & R1 & Alto & La v2 la reemplaza\\
-  PRO-MED-007 & 2 & Vigente & -- & Medio & ACTA-CTO-2025-11, num. 3.2\\
-  PRO-OPE-012 & 2 & No vigente & R1 & Alto & La v3 la reemplaza\\
-  PRO-OPE-012 & 3 & Vigente & -- & Alto & ACTA-CTO-2025-11, num. 3.1\\
-  PRO-OPE-021 & 1 & Vigente & -- & Presunción & Única versión, sin evidencia en contra\\
-  PRO-SEG-009 & 1 & No vigente & R2 & Alto & PRO-SEG-015 v1 la reemplaza\\
-  PRO-SEG-015 & 1 & Vigente & -- & Presunción & Sucesor de PRO-SEG-009\\
-  RES-ANH-0471-2023 & -- & Vigente & -- & Presunción & Art. 5; sin derogatoria en el corpus\\
-  RES-CREG-0043-2024 & -- & Vigente & -- & Presunción & Art. 6; declaración propia\\
-  RES-CREG-0112-2021 & -- & No vigente & R3 & Alto & RES-CREG-0043-2024, art. 6\\
-  ACTA-CTO-2025-07 & -- & Vigente & R4 & Presunción & Registro; num. 4.2\\
-  ACTA-CTO-2025-11 & -- & Vigente & R4 & Presunción & Registro; num. 4.2\\
-  COM-PRV-0098 & -- & Vigente & R4 & Presunción & Registro; sección Alcance\\
-  COM-PRV-0134 & -- & Vigente & R4 & Presunción & Registro de proveedor\\
-  FIC-ACT-P101 & 2 & Vigente & -- & Presunción & Última versión, sin evidencia en contra\\
+  MAN-MTO-002 & 1 & Vigente & R5 & Área emisora & ACTA-CTO-2025-11, num. 3.3\\
+  MAN-OPE-001 & 3 & Vigente & R5 & Área emisora & ACTA-CTO-2025-11, num. 3.3\\
+  MAN-OPE-004 & 2 & En duda & R5 & En conflicto & ACTA-CTO-2025-11, num. 3.3; certificación pendiente\\
+  PRO-HSE-003 & 4 & Vigente & -- & Área emisora & Última versión, sin evidencia en contra\\
+  PRO-MED-007 & 1 & No vigente & R1 & Documental & La v2 la reemplaza\\
+  PRO-MED-007 & 2 & Vigente & -- & Documental & ACTA-CTO-2025-11, num. 3.2\\
+  PRO-OPE-012 & 2 & No vigente & R1 & Documental & La v3 la reemplaza\\
+  PRO-OPE-012 & 3 & Vigente & -- & Documental & ACTA-CTO-2025-11, num. 3.1\\
+  PRO-OPE-021 & 1 & Vigente & -- & Área emisora & Única versión, sin evidencia en contra\\
+  PRO-SEG-009 & 1 & No vigente & R2 & Documental & PRO-SEG-015 v1 la reemplaza\\
+  PRO-SEG-015 & 1 & Vigente & -- & Área emisora & Sucesor de PRO-SEG-009\\
+  RES-ANH-0471-2023 & -- & Vigente & -- & Área emisora & Art. 5; sin derogatoria en el corpus\\
+  RES-CREG-0043-2024 & -- & Vigente & -- & Área emisora & Art. 6; declaración propia\\
+  RES-CREG-0112-2021 & -- & No vigente & R3 & Documental & RES-CREG-0043-2024, art. 6\\
+  ACTA-CTO-2025-07 & -- & Vigente & R4 & Área emisora & Registro; num. 4.2\\
+  ACTA-CTO-2025-11 & -- & Vigente & R4 & Área emisora & Registro; num. 4.2\\
+  COM-PRV-0098 & -- & Vigente & R4 & Área emisora & Registro; sección Alcance\\
+  COM-PRV-0134 & -- & Vigente & R4 & Área emisora & Registro de proveedor\\
+  FIC-ACT-P101 & 2 & Vigente & -- & Área emisora & Última versión, sin evidencia en contra\\
 \end{longtable}

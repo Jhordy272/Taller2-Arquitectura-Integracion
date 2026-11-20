@@ -179,10 +179,10 @@ Lectura y límites:
   ADR-01 Motor & Qdrant en Docker con imagen de versión fija y API universal de consultas (desde la versión 1.10). El motor queda aislado detrás de un repositorio.\\
   ADR-02 Partición & Identificador determinista \texttt{code@version\#section}; los documentos sin versión usan \texttt{unversioned}. Sin solapamiento. El contenido previo al primer numeral, como una tabla, forma la unidad de la sección. El texto indexado se antecede con los títulos del documento y de la sección. El contexto de la sección padre se entrega en un campo aparte, con su cita, y no se indexa.\\
   ADR-03 Respuesta & El contenido se entrega como dato, en un campo separado y marcado como no confiable. Los rechazos y las alertas son avisos fijos del sistema.\\
-  ADR-04 Embeddings & Revisión del modelo fijada en Hugging Face, con los prefijos \texttt{query:} y \texttt{passage:}. Cada colección registra modelo, revisión, dimensiones y versiones de la partición, del tokenizador y de las reglas de detección. El servidor no arranca si el modelo no coincide con el de la colección. Cambiar cualquiera de esos componentes exige una reindexación azul-verde mediante alias; un cambio de vigencia no la requiere. Los pasos están en el README.\\
+  ADR-04 Embeddings & Revisión del modelo fijada en Hugging Face, con los prefijos \texttt{query:} y \texttt{passage:}. Cada colección registra modelo, revisión, dimensiones y versiones de la partición, del tokenizador y de las reglas de detección. Al iniciar, el servidor verifica que el modelo coincida con el de la colección y se niega a arrancar si no coincide. Cambiar cualquiera de esos componentes exige una reindexación azul-verde mediante alias; un cambio de vigencia no la requiere. Los pasos están en el README.\\
   ADR-05 Recuperación & Vectores dispersos con ponderación IDF y tokenizador propio, que normaliza tildes y mayúsculas, y conserva cada identificador completo además de sus partes. Fusión con Reciprocal Rank Fusion. El filtro \texttt{validity\_status = valid}, más la exclusión de los pares documento--versión que el registro vivo no da por vigentes, se declara en cada rama y no es un parámetro de la herramienta. Como RRF ordena pero no mide pertinencia, el rechazo usa dos reglas: un identificador debe aparecer completo en el fragmento, y una pregunta en lenguaje natural debe superar un umbral de similitud coseno, calibrado en la sección~\ref{sec:calibracion}, y además mencionar al menos la mitad de sus términos de contenido, con raíz de cinco letras (\texttt{LexicalGuard}, sección~\ref{sec:mitigacion}). La consulta conserva los identificadores completos, y sus partes solo existen en lo indexado.\\
   ADR-06 Seguridad & Reglas deterministas en la ingesta marcan cada fragmento con \texttt{injection\_risk} y el motivo. La retención cubre las dos herramientas y el contexto de la sección padre, y se aplica después del filtro de vigencia. El prototipo usa transporte local.\\
-  ADR-07 Vigencia & El registro está en \texttt{data/validity\_registry.yaml}, con los estados \texttt{valid}, \texttt{not\_valid} e \texttt{in\_doubt}. Cada entrada declara estado propuesto y efectivo, regla, evidencia, autoridad y datos de certificación (\texttt{certification\_state}: \texttt{assumed}, \texttt{simulated} o \texttt{pending}). La ingesta copia el estado en cada fragmento. El servidor relee el registro cuando cambia y lo aplica a la búsqueda sin reiniciarse; \texttt{--sync-validity} alinea el estado guardado, sin recalcular vectores.\\
+  ADR-07 Vigencia & El registro está en \texttt{data/validity\_registry.yaml}, con los estados \texttt{valid}, \texttt{not\_valid} e \texttt{in\_doubt}. Cada entrada declara estado propuesto y efectivo, regla, evidencia, autoridad y datos de certificación (\texttt{certification\_state}, con \texttt{pending} mientras el área no responde). La ingesta copia el estado en cada fragmento. El servidor relee el registro cuando cambia y lo aplica a la búsqueda sin reiniciarse; \texttt{--sync-validity} alinea el estado guardado, sin recalcular vectores.\\
   ADR-08 Contrato MCP & Pistas \texttt{ttlMs} y \texttt{cacheScope} declaradas por método en el constructor del servidor. Resources en \texttt{app/resources/ValidityResources.py}, con el mismo registro vivo que las herramientas. \texttt{server/discover} y el middleware de OpenTelemetry los provee el SDK.\\
 \end{longtable}
 
@@ -207,21 +207,6 @@ La Tabla~\ref{tab:instanciacion} ubica cada decisión en el elemento del reposit
   ADR-08 & \texttt{DocumentTools}, \texttt{ValidityResources}, \texttt{main.cache\_hints} & Contrato MCP: herramientas, resources y pistas de caché\\
 \end{longtable}
 
-\subsection{Evidencia de cada decisión}
+\subsection{Resultados de cada decisión}
 
-\begin{table}[H]
-\centering
-\caption{Evidencia de cada decisión}\label{tab:validacion}
-\begin{tabular}{L{1.6cm} L{14.0cm}}
-  \tblhead ADR & \color{white}\bfseries Evidencia\\
-  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 7/7 casos de referencia.\\
-  ADR-02 & Los 19 PDF coinciden con su Markdown. Comparación con tamaño fijo en la sección~\ref{sec:particion}.\\
-  ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 66/66 casos.\\
-  ADR-04 & Hit de 0,86 en casos nuevos y 1,00 en holdout. El servidor no arranca con un modelo distinto al de la colección.\\
-  ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. La guarda léxica baja las respuestas falsas en holdout de 4/10 a 1/10. Latencia máxima de 1,4 s frente a los 5 s de EI16.\\
-  ADR-06 & El anexo malicioso se retiene en todas las pruebas; el detector cubre 5/13 variantes (sección~\ref{sec:envenenamiento}).\\
-  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}). MAN-OPE-004, en duda, se excluye sin contenido; un cambio del registro llega a las respuestas en 2,05 s como máximo.\\
-  ADR-08 & Un cliente por \texttt{stdio} negocia la revisión 2026-07-28 y recibe \texttt{ttlMs} y \texttt{cacheScope} en los listados y el registro como resource.\\
-  \bottomrule
-\end{tabular}
-\end{table}
+Los resultados obtenidos al ejecutar el experimento sobre cada decisión se reportan en la sección~\ref{sec:resultados-decision}.

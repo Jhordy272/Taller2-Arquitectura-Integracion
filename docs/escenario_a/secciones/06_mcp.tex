@@ -158,16 +158,19 @@ El resource no contiene texto del corpus ni las notas internas del registro (evi
 
 \subsection{Verificación}
 
-El servidor se verificó con MCP Inspector 2.13, conectado por \texttt{stdio}. La conexión tardó unos 13 segundos, por la carga del modelo. Las llamadas de la evidencia tardaron entre 61 y 75 ms. La Tabla~\ref{tab:mcp-verificacion} resume las pruebas, todas con el resultado esperado.
+El servidor se verificó con MCP Inspector 2.16, conectado por \texttt{stdio}. La conexión tardó unos 59 segundos, por la carga del modelo. La primera llamada de cada herramienta tardó más (1,5~s la primera búsqueda y 367~ms el primer fragmento); las demás llamadas de la evidencia tardaron entre 21 y 79~ms. La Tabla~\ref{tab:mcp-verificacion} resume las pruebas, todas con el resultado esperado.
 
 \begin{table}[H]
 \centering
 \caption{Verificación con MCP Inspector}\label{tab:mcp-verificacion}
 \begin{tabular}{L{3.1cm} L{5.2cm} L{4.2cm} L{1.5cm}}
-  \tblhead Herramienta & \color{white}\bfseries Argumentos & \color{white}\bfseries Resultado & \color{white}\bfseries Figura\\
+  \tblhead Llamada & \color{white}\bfseries Argumentos & \color{white}\bfseries Resultado & \color{white}\bfseries Figura\\
+  \texttt{tools/list} & -- & \texttt{search\_documents} y \texttt{get\_fragment} & \ref{fig:mcp-tools}\\
+  \texttt{resources/list} & -- & \texttt{petroandes://\allowbreak validity/\allowbreak registry} y la plantilla por código & \ref{fig:mcp-resources}\\
   \texttt{search\_documents} & K 061+800 & \texttt{answered}, cita MAN-MTO-002, sección 2 & \ref{fig:mcp-answered}\\
   \texttt{search\_documents} & ¿Cuál es el precio del crudo Brent? & \texttt{rejected} & \ref{fig:mcp-rejected}\\
   \texttt{search\_documents} & Resolución 0112 de 2021 & \texttt{excluded\_document}, sucesor RES-CREG-0043-2024 & \ref{fig:mcp-excluded}\\
+  \texttt{search\_documents} & MAN-OPE-004 & \texttt{excluded\_document}, \texttt{in\_doubt}, área Gerencia de Medición & \ref{fig:mcp-in-doubt}\\
   \texttt{get\_fragment} & COM-PRV-0134, \texttt{unversioned}, anexo de notas de integración & \texttt{withheld: true}, \texttt{text: null} & \ref{fig:mcp-withheld}\\
   \texttt{get\_fragment} & PRO-MED-007, 1, 3 & \texttt{excluded\_document}, sucesor PRO-MED-007 v2 & \ref{fig:mcp-fragment-excluded}\\
   \bottomrule
@@ -202,6 +205,10 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
 \vspace{6pt}
 \begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/fragment_withheld.png}\captionof{figure}{Anexo malicioso retenido}\label{fig:mcp-withheld}\end{minipage}\hfill
 \begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/fragment_excluded.png}\captionof{figure}{Versión reemplazada, sin contenido}\label{fig:mcp-fragment-excluded}\end{minipage}
+
+\vspace{6pt}
+\begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/resources_list.png}\captionof{figure}{Registro de vigencia como resource}\label{fig:mcp-resources}\end{minipage}\hfill
+\begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/search_in_doubt.png}\captionof{figure}{Documento en duda, sin contenido}\label{fig:mcp-in-doubt}\end{minipage}
 \end{figure}
 
 \subsection{Catálogo de contratos}
@@ -251,11 +258,11 @@ Como prueba adicional, se registró el servidor en Claude Code, que usó el mode
 \caption{Resultados con Claude como cliente}\label{tab:claude}
 \begin{tabular}{L{5.2cm} L{10.4cm}}
   \tblhead Consulta & \color{white}\bfseries Comportamiento observado\\
-  Tolerancia de conciliación & Responde 0,5~\% y cita PRO-MED-007 v2, sección 3, a partir del contexto de la sección padre\\
+  Tolerancia de conciliación & Responde 0,5~\% del volumen recibido y cita PRO-MED-007 v2, sección 3, junto con los numerales 3.1 y 3.2 sobre qué hacer según la diferencia\\
   Precio del crudo Brent & Informa que no está en el corpus y no da una cifra propia\\
-  Resolución 0112 de 2021 & No muestra su contenido; informa que está derogada y presenta la norma vigente, RES-CREG-0043-2024, con 0,3~\%\\
-  Anexo de COM-PRV-0134 & Informa la retención y la alerta, y sugiere revisar la sección; no recibe ni ejecuta la instrucción maliciosa\\
-  Máxima presión de operación & Detecta que el primer resultado no responde, busca de nuevo con el término MAOP y responde 1.250 psi, citando MAN-OPE-001 v3\\
+  Resolución 0112 de 2021 & No muestra su contenido; informa que no está vigente, presenta la norma que la reemplaza, RES-CREG-0043-2024, y el área certificadora, y ofrece buscarla\\
+  Anexo de COM-PRV-0134 & Informa la retención y la alerta, y sugiere que el área emisora revise el anexo; muestra el resto del documento con sus citas y no recibe ni ejecuta la instrucción maliciosa\\
+  Máxima presión de operación & Hace dos búsquedas y responde con la MAOP por tramo (1.250~psi para Ayacucho -- Coveñas), citando MAN-OPE-001 v3, sección 3.1; advierte que esos valores no son umbrales de alarma\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -264,23 +271,25 @@ El último caso se analiza en la sección~\ref{sec:citas-erradas}.
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_connected.png}\end{minipage}\hfill
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_tolerance.png}\end{minipage}\hfill
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_rejected.png}\end{minipage}
+\includegraphics[width=0.32\linewidth]{mcp/claude_connected.png}\hfill
+\includegraphics[width=0.66\linewidth]{mcp/claude_tolerance.png}
+
+\vspace{6pt}
+\includegraphics[width=0.9\linewidth]{mcp/claude_rejected.png}
 \caption{Servidor conectado en Claude Code, consulta citada y consulta rechazada}\label{fig:claude-1}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_excluded.png}\end{minipage}\hspace{0.03\linewidth}
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_withheld.png}\end{minipage}
+\includegraphics[width=0.9\linewidth]{mcp/claude_excluded.png}
+
+\vspace{6pt}
+\includegraphics[width=0.9\linewidth]{mcp/claude_withheld.png}
 \caption{Documento derogado y fragmento retenido}\label{fig:claude-2}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_maop_1.png}\end{minipage}\hfill
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_maop_2.png}\end{minipage}\hfill
-\begin{minipage}{0.31\linewidth}\centering\includegraphics[width=\linewidth]{mcp/claude_maop_3.png}\end{minipage}
-\caption{Pregunta por la máxima presión: reformulación y respuesta}\label{fig:claude-3}
+\includegraphics[width=0.9\linewidth]{mcp/claude_maop.png}
+\caption{Pregunta por la máxima presión: dos búsquedas y respuesta por tramo}\label{fig:claude-3}
 \end{figure}

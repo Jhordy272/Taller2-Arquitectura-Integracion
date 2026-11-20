@@ -127,6 +127,27 @@ El costo es real: A17 pregunta después de cuánto tiempo de parada aplica el ar
 
 Dos efectos no se deben atribuir a la guarda. La pregunta O04, sobre el proveedor de los medidores de ultrasonido, era una respuesta falsa que citaba MAN-OPE-004; ahora se rechaza porque ese manual está en duda, es decir, por gobierno y no por recuperación. Y la guarda no resuelve O09, N08 ni D01, cuyos pasajes comparten la mayoría de los términos de la pregunta sin responderla.
 
+\subsection{Resultados por decisión}\label{sec:resultados-decision}
+
+La Tabla~\ref{tab:validacion} reúne lo observado al ejecutar el experimento sobre cada decisión de la sección~\ref{sec:adrs-resumen}. Son resultados de la ejecución, no parte de las decisiones.
+
+\begin{table}[H]
+\centering
+\caption{Resultado observado por decisión}\label{tab:validacion}
+\begin{tabular}{L{1.6cm} L{14.0cm}}
+  \tblhead ADR & \color{white}\bfseries Resultado observado\\
+  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 7/7 casos de referencia.\\
+  ADR-02 & Los 19 PDF coinciden con su Markdown. Comparación con tamaño fijo en la sección~\ref{sec:particion}.\\
+  ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 66/66 casos.\\
+  ADR-04 & Hit de 0,86 en casos nuevos y 1,00 en holdout. El servidor no arranca con un modelo distinto al de la colección.\\
+  ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. La guarda léxica baja las respuestas falsas en holdout de 4/10 a 1/10. Latencia máxima de 1,4 s frente a los 5 s de EI16.\\
+  ADR-06 & El anexo malicioso se retiene en todas las pruebas; el detector cubre 5/13 variantes (sección~\ref{sec:envenenamiento}).\\
+  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}). MAN-OPE-004, en duda, se excluye sin contenido; un cambio del registro llega a las respuestas en 2,05 s como máximo.\\
+  ADR-08 & Un cliente por \texttt{stdio} negocia la revisión 2026-07-28 y recibe \texttt{ttlMs} y \texttt{cacheScope} en los listados y el registro como resource.\\
+  \bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Valores inaceptables en operación}
 
 Estos valores son una propuesta del grupo, no un requisito del enunciado. La respuesta falsa se mide en los holdout, por ser los únicos no vistos.
@@ -191,6 +212,6 @@ Causa. El umbral decide si hay soporte, no si el pasaje es el correcto. En la pr
 
 Qué garantiza el diseño y qué no. La composición determinista del ADR-03 impide inventar texto y alterar valores, pero no impide mostrar un pasaje equivocado. El anclaje lo señala en evaluación (A14: 0,00), porque se compara con la respuesta esperada; en operación esa respuesta no existe, así que nada lo detecta.
 
-Con un modelo como cliente. En una prueba con Claude (sección~\ref{sec:contrato-mcp}), la misma pregunta por la máxima presión recibió los mismos pasajes. El modelo notó que no respondían, buscó de nuevo con el término técnico MAOP y llegó a 1.250 psi, citando MAN-OPE-001 v3 y advirtiendo que no debía confundirse con el umbral de alarma. El servicio por sí solo sigue fallando: esa corrección viene del cliente, que usó su conocimiento del término para reformular. Es una sola ejecución, depende del modelo y no puede ser la defensa del servicio. Sí es un argumento para el Escenario B: juzgar si un pasaje responde y reformular es una función que justifica un enfoque agéntico, mientras que la vigencia y la retención deben seguir en el servidor.
+Con un modelo como cliente. En una prueba con Claude (sección~\ref{sec:contrato-mcp}), el modelo hizo dos búsquedas para la pregunta por la máxima presión y respondió con la MAOP de cada tramo (1.250 psi para Ayacucho -- Coveñas), citando MAN-OPE-001 v3 y advirtiendo que esos valores no deben tomarse como umbrales de alarma. El servicio por sí solo sigue fallando: esa corrección viene del cliente, que decidió buscar de nuevo. Es una sola ejecución, depende del modelo y no puede ser la defensa del servicio. Sí es un argumento para el Escenario B: juzgar si un pasaje responde y reformular es una función que justifica un enfoque agéntico, mientras que la vigencia y la retención deben seguir en el servidor.
 
 Decisión. Estos fallos se reportan y no se corrigen con reglas hechas para ellos: ajustar el sistema a dos preguntas ya conocidas mejoraría la demostración sin mostrar cuánto falla. Se miden en el arnés, de modo que una medida futura, como un reranker, pueda evaluarse sobre ellos y sobre casos no vistos.
