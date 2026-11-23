@@ -108,7 +108,6 @@ Los comandos son iguales en ambas terminales, salvo `curl`: en PowerShell escrib
 | Consulta citada | `python -m app.ask "K 061+800"` desde `mcp_server/` | `status: answered`, con la cita de `MAN-MTO-002`, sección 2 |
 | Consulta rechazada | `python -m app.ask "¿Cuál es el precio del crudo Brent?"` desde `mcp_server/` | `status: rejected` |
 | Documento derogado | `python -m app.ask "RES-CREG-0112-2021"` desde `mcp_server/` | `status: excluded_document`, con su sucesor y sin contenido |
-| Documento en duda | `python -m app.ask "MAN-OPE-004"` desde `mcp_server/` | `status: excluded_document`, con estado `in_doubt` y sin contenido |
 | Rankings de búsqueda | `python -m app.compare "K 061+800"` desde `mcp_server/` | Las listas híbrida, semántica y léxica |
 
 Logs de Qdrant en vivo:

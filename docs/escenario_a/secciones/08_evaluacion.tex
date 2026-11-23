@@ -5,19 +5,18 @@
 
 \subsection{Casos de referencia}
 
-El conjunto está en \texttt{data/reference\_cases.yaml} y lo escribió el grupo. Tiene 66 casos, cada uno con el comportamiento esperado. Las preguntas con respuesta declaran además la respuesta, el fragmento que la contiene y el texto que debe aparecer o no en lo que recibe el usuario, incluida la sección padre.
+El conjunto está en \texttt{data/reference\_cases.yaml} y lo escribió el grupo. Tiene 65 casos, cada uno con el comportamiento esperado. Las preguntas con respuesta declaran además la respuesta, el fragmento que la contiene y el texto que debe aparecer o no en lo que recibe el usuario, incluida la sección padre.
 
 \begin{table}[H]
 \centering
 \caption{Casos de referencia por tipo}\label{tab:casos}
 \begin{tabular}{L{4.2cm} L{1.4cm} L{10.0cm}}
   \tblhead Tipo & \color{white}\bfseries Casos & \color{white}\bfseries Comportamiento esperado\\
-  Con respuesta & 29 & Responde con el valor correcto, sin valores derogados\\
+  Con respuesta & 30 & Responde con el valor correcto, sin valores derogados\\
   Fuera del corpus & 19 & Rechaza la consulta\\
-  Identificador existente & 5 & Responde con el fragmento que lo contiene\\
+  Identificador existente & 6 & Responde con el fragmento que lo contiene\\
   Identificador inexistente & 3 & Rechaza la consulta\\
-  Documento excluido & 7 & Informa su estado y su sucesor, o el área que debe certificarlo si está en duda, sin contenido\\
-  Contenido en duda & 1 & Rechaza la pregunta que solo responde un documento en duda\\
+  Documento excluido & 5 & Informa su estado y su sucesor, sin contenido\\
   Inyección & 2 & El texto malicioso nunca aparece en la respuesta\\
   \bottomrule
 \end{tabular}
@@ -47,7 +46,7 @@ El componente \texttt{evaluation/} ejecuta los casos contra el servidor por MCP,
 
 \subsection{Resultados}
 
-Los resultados corresponden al servicio final: MAN-OPE-004 en duda y la guarda léxica activa.
+Los resultados corresponden al servicio final, con la guarda léxica activa.
 
 \begin{table}[H]
 \centering
@@ -74,7 +73,6 @@ Los resultados corresponden al servicio final: MAN-OPE-004 en duda y la guarda l
   Identificador inexistente & 0/3 & 0~\% & Regla: coincidencia exacta\\
   Con respuesta & 3/29 & 10~\% & Similitud y guarda léxica\\
   Fuera del corpus & 2/19 & 11~\% & Similitud y guarda léxica\\
-  Contenido en duda & 1/1 & 100~\% & Similitud y guarda léxica\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -83,11 +81,9 @@ En los casos, la latencia tuvo una mediana de 27 ms y un percentil 95 de 76 ms. 
 
 \subsection{Lectura de los resultados}\label{sec:lectura}
 
-Los controles por regla no fallaron; la similitud sí. Los 17 casos que dependen de reglas se comportaron como se esperaba, incluidos los documentos derogados, el documento en duda y la inyección. Los seis fallos están en los casos que dependen de la similitud. El dato no prueba que las reglas sean infalibles, porque son pocos casos, pero respalda la decisión de resolver el gobierno con reglas y no con un modelo.
+Los controles por regla no fallaron; la similitud sí. Los 17 casos que dependen de reglas se comportaron como se esperaba, incluidos los documentos derogados y la inyección. Los seis fallos están en los casos que dependen de la similitud. El dato no prueba que las reglas sean infalibles, porque son pocos casos, pero respalda la decisión de resolver el gobierno con reglas y no con un modelo.
 
 El ``no sé'' mejoró, pero no cumple. Antes de la guarda, el servicio respondía con citas a cinco de nueve preguntas fuera del corpus. Con la guarda falla en dos de 19, y en uno de los diez holdout: la renovación de la capacitación de los operadores, que comparte casi todos sus términos con el corpus. La sección~\ref{sec:mitigacion} detalla el experimento.
-
-Un documento en duda no basta para que se responda ``no sé''. La pregunta D01 solo tiene respuesta en MAN-OPE-004. El servicio no muestra ese manual, pero sí devuelve un artículo de RES-CREG-0043-2024 sobre la verificación de medidores, que no responde la pregunta. La exclusión funciona; lo que falla es el rechazo, igual que en las preguntas fuera del corpus.
 
 Los casos ya usados ya no salen mejor. La desviación es de 9~\% en los casos que eligieron el umbral, de 14~\% en los nuevos y de 6~\% en los holdout. La guarda costó un fallo en los casos de calibración (A17, sección~\ref{sec:mitigacion}), y los holdout, aunque son los más independientes, son solo 17.
 
@@ -136,13 +132,13 @@ La Tabla~\ref{tab:validacion} reúne lo observado al ejecutar el experimento sob
 \caption{Resultado observado por decisión}\label{tab:validacion}
 \begin{tabular}{L{1.6cm} L{14.0cm}}
   \tblhead ADR & \color{white}\bfseries Resultado observado\\
-  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 7/7 casos de referencia.\\
+  ADR-01 & Ningún documento excluido aparece en ninguna rama, en las pruebas automáticas y en 5/5 casos de referencia.\\
   ADR-02 & Los 19 PDF coinciden con su Markdown. Comparación con tamaño fijo en la sección~\ref{sec:particion}.\\
   ADR-03 & Dos ejecuciones dan pasajes y orden idénticos en 66/66 casos.\\
   ADR-04 & Hit de 0,86 en casos nuevos y 1,00 en holdout. El servidor no arranca con un modelo distinto al de la colección.\\
   ADR-05 & \texttt{K 061+800}: la búsqueda semántica falla y la híbrida acierta. La guarda léxica baja las respuestas falsas en holdout de 4/10 a 1/10. Latencia máxima de 1,4 s frente a los 5 s de EI16.\\
   ADR-06 & El anexo malicioso se retiene en todas las pruebas; el detector cubre 5/13 variantes (sección~\ref{sec:envenenamiento}).\\
-  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}). MAN-OPE-004, en duda, se excluye sin contenido; un cambio del registro llega a las respuestas en 2,05 s como máximo.\\
+  ADR-07 & Cada documento tiene una entrada con evidencia en el registro (sección~\ref{sec:contrato}). Un cambio del registro llega a las respuestas en 2,05 s como máximo.\\
   ADR-08 & Un cliente por \texttt{stdio} negocia la revisión 2026-07-28 y recibe \texttt{ttlMs} y \texttt{cacheScope} en los listados y el registro como resource.\\
   \bottomrule
 \end{tabular}

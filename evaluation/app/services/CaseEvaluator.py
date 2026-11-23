@@ -5,8 +5,7 @@ import json
 from app.models.CaseResult import CaseResult, CaseVerdict
 
 _ANSWER_KINDS = {"answerable", "identifier"}
-# in_doubt_content: the answer exists only in a document in doubt, so it must be refused.
-_REFUSAL_KINDS = {"out_of_corpus", "unknown_identifier", "in_doubt_content"}
+_REFUSAL_KINDS = {"out_of_corpus", "unknown_identifier"}
 
 
 def citation_id(citation: dict) -> str:

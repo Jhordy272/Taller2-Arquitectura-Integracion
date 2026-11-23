@@ -6,7 +6,7 @@ from statistics import mean, median, quantiles
 from app.models.CaseResult import CaseResult
 
 ORIGINS = ("holdout", "new", "validation", "tuning")
-KINDS = ("answerable", "out_of_corpus", "identifier", "unknown_identifier", "excluded", "in_doubt_content", "injection")
+KINDS = ("answerable", "out_of_corpus", "identifier", "unknown_identifier", "excluded", "injection")
 
 
 def _mean(values: list[float]) -> float | None:

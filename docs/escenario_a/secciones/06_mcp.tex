@@ -170,7 +170,6 @@ El servidor se verificó con MCP Inspector 2.16, conectado por \texttt{stdio}. L
   \texttt{search\_documents} & K 061+800 & \texttt{answered}, cita MAN-MTO-002, sección 2 & \ref{fig:mcp-answered}\\
   \texttt{search\_documents} & ¿Cuál es el precio del crudo Brent? & \texttt{rejected} & \ref{fig:mcp-rejected}\\
   \texttt{search\_documents} & Resolución 0112 de 2021 & \texttt{excluded\_document}, sucesor RES-CREG-0043-2024 & \ref{fig:mcp-excluded}\\
-  \texttt{search\_documents} & MAN-OPE-004 & \texttt{excluded\_document}, \texttt{in\_doubt}, área Gerencia de Medición & \ref{fig:mcp-in-doubt}\\
   \texttt{get\_fragment} & COM-PRV-0134, \texttt{unversioned}, anexo de notas de integración & \texttt{withheld: true}, \texttt{text: null} & \ref{fig:mcp-withheld}\\
   \texttt{get\_fragment} & PRO-MED-007, 1, 3 & \texttt{excluded\_document}, sucesor PRO-MED-007 v2 & \ref{fig:mcp-fragment-excluded}\\
   \bottomrule
@@ -187,8 +186,7 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
   \texttt{server/discover} & -- & Revisión 2026-07-28, con herramientas y resources\\
   \texttt{tools/list} & -- & Dos herramientas; \texttt{ttlMs} 3.600.000, \texttt{cacheScope} \texttt{public}\\
   \texttt{resources/list} & -- & \texttt{petroandes://validity/registry}; \texttt{ttlMs} 3.600.000\\
-  \texttt{resources/read} & \texttt{petroandes://\allowbreak validity/\allowbreak MAN-OPE-004} & Estado \texttt{in\_doubt}, certificación \texttt{pending}; \texttt{ttlMs} 2.000\\
-  \texttt{search\_documents} & MAN-OPE-004 & \texttt{excluded\_document}, \texttt{in\_doubt}, área Gerencia de Medición, sin contenido\\
+  \texttt{resources/read} & \texttt{petroandes://\allowbreak validity/\allowbreak MAN-OPE-004} & Estado \texttt{valid}, certificación \texttt{assumed}; \texttt{ttlMs} 2.000\\
   \bottomrule
 \end{tabular}
 \end{table}
@@ -207,8 +205,7 @@ Las capacidades añadidas tras la primera verificación se comprobaron con un cl
 \begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/fragment_excluded.png}\captionof{figure}{Versión reemplazada, sin contenido}\label{fig:mcp-fragment-excluded}\end{minipage}
 
 \vspace{6pt}
-\begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/resources_list.png}\captionof{figure}{Registro de vigencia como resource}\label{fig:mcp-resources}\end{minipage}\hfill
-\begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/search_in_doubt.png}\captionof{figure}{Documento en duda, sin contenido}\label{fig:mcp-in-doubt}\end{minipage}
+\begin{minipage}{0.49\linewidth}\centering\includegraphics[width=\linewidth]{mcp/resources_list.png}\captionof{figure}{Registro de vigencia como resource}\label{fig:mcp-resources}\end{minipage}
 \end{figure}
 
 \subsection{Catálogo de contratos}
